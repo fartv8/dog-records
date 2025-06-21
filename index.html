@@ -23,7 +23,7 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    form input[type="text"], button {
+    form input[type="text"], form textarea, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
@@ -70,6 +70,7 @@
     <input type="text" id="dogName" placeholder="Dog Name" required>
     <input type="text" id="ownerName" placeholder="Owner Name" required>
     <input type="text" id="breed" placeholder="Breed" required>
+    <textarea id="description" placeholder="Description"></textarea>
     <button type="submit">Add Dog</button>
   </form>
 
@@ -79,6 +80,7 @@
         <th>Dog Name</th>
         <th>Owner Name</th>
         <th>Breed</th>
+        <th>Description</th>
         <th>Check In</th>
         <th>Check Out</th>
         <th>Actions</th>
@@ -112,12 +114,13 @@
         <td contenteditable="false">${dog.name}</td>
         <td contenteditable="false">${dog.owner}</td>
         <td contenteditable="false">${dog.breed}</td>
+        <td contenteditable="false">${dog.description || ''}</td>
         <td>
-          <button onclick="checkIn('${id}', this)" ${dog.checkIn ? 'disabled' : ''}>${dog.checkIn ? '✔ Checked In' : 'Check In'}</button>
+          <button onclick="checkIn('${id}')">Check In</button>
           <div class="timestamp">${dog.checkIn || ''}</div>
         </td>
         <td>
-          <button onclick="checkOut('${id}', this)" ${dog.checkOut ? 'disabled' : ''}>${dog.checkOut ? '✔ Checked Out' : 'Check Out'}</button>
+          <button onclick="checkOut('${id}')">Check Out</button>
           <div class="timestamp">${dog.checkOut || ''}</div>
         </td>
         <td class="action-buttons">
@@ -143,6 +146,7 @@
         name: cells[0].textContent.trim(),
         owner: cells[1].textContent.trim(),
         breed: cells[2].textContent.trim(),
+        description: cells[3].textContent.trim(),
         checkIn: row.querySelector('.timestamp')?.textContent || '',
         checkOut: row.querySelectorAll('.timestamp')[1]?.textContent || ''
       };
@@ -158,12 +162,12 @@
       }
     }
 
-    function checkIn(id, button) {
+    function checkIn(id) {
       const time = new Date().toLocaleString();
       db.ref('dogs/' + id + '/checkIn').set(time);
     }
 
-    function checkOut(id, button) {
+    function checkOut(id) {
       const time = new Date().toLocaleString();
       db.ref('dogs/' + id + '/checkOut').set(time);
     }
@@ -173,6 +177,7 @@
       const name = document.getElementById('dogName').value.trim();
       const owner = document.getElementById('ownerName').value.trim();
       const breed = document.getElementById('breed').value.trim();
+      const description = document.getElementById('description').value.trim();
 
       if (!name || !owner || !breed) {
         alert('Please fill out all fields.');
@@ -180,7 +185,7 @@
       }
 
       const newDogRef = db.ref('dogs').push();
-      newDogRef.set({ name, owner, breed });
+      newDogRef.set({ name, owner, breed, description });
       form.reset();
     });
 
