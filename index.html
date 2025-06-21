@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dog Records</title>
   <style>
     body {
@@ -50,51 +50,19 @@
     tr:nth-child(even) {
       background-color: #f2f2f2;
     }
-    button.action-btn {
-      margin-right: 5px;
-      padding: 5px 10px;
-      font-size: 0.9rem;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-    }
-    button.edit-btn {
-      background-color: #ffc107;
-      color: #333;
-    }
-    button.save-btn {
-      background-color: #4CAF50;
-      color: white;
-      display: none;
-    }
-    button.cancel-btn {
-      background-color: #6c757d;
-      color: white;
-      display: none;
-    }
-    button.delete-btn {
-      background-color: #dc3545;
-      color: white;
-    }
-    input.edit-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 8px;
-      font-size: 1rem;
+    .action-buttons {
+      display: flex;
+      gap: 10px;
     }
   </style>
-  <!-- Firebase App (the core Firebase SDK) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <!-- Firebase Realtime Database -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>Dog Records</h1>
 
   <form id="dogForm">
-    <input type="text" id="dogName" placeholder="Dog Name" required />
-    <input type="text" id="ownerName" placeholder="Owner Name" required />
-    <input type="text" id="breed" placeholder="Breed" required />
+    <input type="text" id="dogName" placeholder="Dog Name" required>
+    <input type="text" id="ownerName" placeholder="Owner Name" required>
+    <input type="text" id="breed" placeholder="Breed" required>
     <button type="submit">Add Dog</button>
   </form>
 
@@ -104,7 +72,8 @@
         <th>Dog Name</th>
         <th>Owner Name</th>
         <th>Breed</th>
-        <th>Actions</th>
+        <th>Check In</th>
+        <th>Check Out</th>
       </tr>
     </thead>
     <tbody id="dogTableBody">
@@ -113,157 +82,62 @@
   </table>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBLFMBvc4HF9atMxzY7Rf1u-oBJBAYZvTo",
-      authDomain: "dog-records-656c0.firebaseapp.com",
-      projectId: "dog-records-656c0",
-      storageBucket: "dog-records-656c0.firebasestorage.app",
-      messagingSenderId: "347010811100",
-      appId: "1:347010811100:web:e32d9e95f860b2d16fa019"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
     const form = document.getElementById('dogForm');
     const tableBody = document.getElementById('dogTableBody');
 
-    // Add dog row to table, with edit/delete buttons
-    function addDogToTable(dog, id) {
+    function loadDogs() {
+      const dogs = JSON.parse(localStorage.getItem('dogs')) || [];
+      dogs.forEach(dog => addDogToTable(dog));
+    }
+
+    function saveDog(dog) {
+      const dogs = JSON.parse(localStorage.getItem('dogs')) || [];
+      dogs.push(dog);
+      localStorage.setItem('dogs', JSON.stringify(dogs));
+    }
+
+    function addDogToTable(dog) {
       const newRow = document.createElement('tr');
-      newRow.setAttribute('data-id', id);
       newRow.innerHTML = `
-        <td class="name-cell">${dog.name}</td>
-        <td class="owner-cell">${dog.owner}</td>
-        <td class="breed-cell">${dog.breed}</td>
-        <td>
-          <button class="action-btn edit-btn">Edit</button>
-          <button class="action-btn save-btn">Save</button>
-          <button class="action-btn cancel-btn">Cancel</button>
-          <button class="action-btn delete-btn">Delete</button>
-        </td>
+        <td>${dog.name}</td>
+        <td>${dog.owner}</td>
+        <td>${dog.breed}</td>
+        <td><button onclick="checkIn(this)">Check In</button></td>
+        <td><button onclick="checkOut(this)">Check Out</button></td>
       `;
       tableBody.appendChild(newRow);
-
-      const editBtn = newRow.querySelector('.edit-btn');
-      const saveBtn = newRow.querySelector('.save-btn');
-      const cancelBtn = newRow.querySelector('.cancel-btn');
-      const deleteBtn = newRow.querySelector('.delete-btn');
-
-      // Edit button functionality
-      editBtn.addEventListener('click', () => {
-        toggleEditRow(newRow, true);
-      });
-
-      // Cancel button functionality
-      cancelBtn.addEventListener('click', () => {
-        toggleEditRow(newRow, false, true);
-      });
-
-      // Save button functionality
-      saveBtn.addEventListener('click', () => {
-        saveEditedRow(newRow, id);
-      });
-
-      // Delete button functionality
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this dog?')) {
-          database.ref('dogs/' + id).remove();
-        }
-      });
     }
 
-    // Enable or disable editing on a row
-    function toggleEditRow(row, isEditing, cancel = false) {
-      const nameCell = row.querySelector('.name-cell');
-      const ownerCell = row.querySelector('.owner-cell');
-      const breedCell = row.querySelector('.breed-cell');
-
-      const editBtn = row.querySelector('.edit-btn');
-      const saveBtn = row.querySelector('.save-btn');
-      const cancelBtn = row.querySelector('.cancel-btn');
-
-      if (isEditing) {
-        // Turn cells into input fields
-        nameCell.innerHTML = `<input type="text" class="edit-input" value="${nameCell.textContent}" />`;
-        ownerCell.innerHTML = `<input type="text" class="edit-input" value="${ownerCell.textContent}" />`;
-        breedCell.innerHTML = `<input type="text" class="edit-input" value="${breedCell.textContent}" />`;
-
-        editBtn.style.display = 'none';
-        saveBtn.style.display = 'inline-block';
-        cancelBtn.style.display = 'inline-block';
-      } else {
-        if (cancel) {
-          // Revert to original text (stored in inputs' defaultValue)
-          nameCell.textContent = nameCell.querySelector('input').defaultValue;
-          ownerCell.textContent = ownerCell.querySelector('input').defaultValue;
-          breedCell.textContent = breedCell.querySelector('input').defaultValue;
-        } else {
-          // We save new values when save button is clicked, so no action here
-        }
-
-        editBtn.style.display = 'inline-block';
-        saveBtn.style.display = 'none';
-        cancelBtn.style.display = 'none';
-      }
+    function checkIn(button) {
+      const row = button.parentElement.parentElement;
+      button.textContent = '✔ Checked In';
+      button.disabled = true;
     }
 
-    // Save edited row to Firebase
-    function saveEditedRow(row, id) {
-      const nameInput = row.querySelector('.name-cell input');
-      const ownerInput = row.querySelector('.owner-cell input');
-      const breedInput = row.querySelector('.breed-cell input');
-
-      const updatedDog = {
-        name: nameInput.value.trim(),
-        owner: ownerInput.value.trim(),
-        breed: breedInput.value.trim()
-      };
-
-      if (!updatedDog.name || !updatedDog.owner || !updatedDog.breed) {
-        alert('Please fill out all fields.');
-        return;
-      }
-
-      database.ref('dogs/' + id).set(updatedDog);
-      toggleEditRow(row, false);
+    function checkOut(button) {
+      const row = button.parentElement.parentElement;
+      button.textContent = '✔ Checked Out';
+      button.disabled = true;
     }
 
-    // Load dogs and listen for changes
-    function loadDogs() {
-      database.ref('dogs').on('value', (snapshot) => {
-        tableBody.innerHTML = '';
-        const dogs = snapshot.val();
-        if (dogs) {
-          Object.entries(dogs).forEach(([id, dog]) => {
-            addDogToTable(dog, id);
-          });
-        }
-      });
-    }
-
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', function(event) {
       event.preventDefault();
-      const dogName = document.getElementById('dogName').value.trim();
-      const ownerName = document.getElementById('ownerName').value.trim();
-      const breed = document.getElementById('breed').value.trim();
+      const dogName = document.getElementById('dogName').value;
+      const ownerName = document.getElementById('ownerName').value;
+      const breed = document.getElementById('breed').value;
 
-      if (!dogName || !ownerName || !breed) {
-        alert('Please fill out all fields.');
-        return;
-      }
-
-      const newDogRef = database.ref('dogs').push();
-      newDogRef.set({
+      const dog = {
         name: dogName,
         owner: ownerName,
         breed: breed
-      });
+      };
 
+      addDogToTable(dog);
+      saveDog(dog);
       form.reset();
     });
 
-    loadDogs();
+    window.onload = loadDogs;
   </script>
 </body>
 </html>
