@@ -15,6 +15,22 @@
       text-align: center;
       color: #333;
     }
+    form {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    form input[type="text"], button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -38,6 +54,14 @@
 </head>
 <body>
   <h1>Dog Records</h1>
+
+  <form id="dogForm">
+    <input type="text" id="dogName" placeholder="Dog Name" required>
+    <input type="text" id="ownerName" placeholder="Owner Name" required>
+    <input type="text" id="breed" placeholder="Breed" required>
+    <button type="submit">Add Dog</button>
+  </form>
+
   <table>
     <thead>
       <tr>
@@ -46,7 +70,7 @@
         <th>Breed</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="dogTableBody">
       <tr>
         <td>Max</td>
         <td>Sarah Lee</td>
@@ -64,5 +88,28 @@
       </tr>
     </tbody>
   </table>
+
+  <script>
+    document.getElementById('dogForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const dogName = document.getElementById('dogName').value;
+      const ownerName = document.getElementById('ownerName').value;
+      const breed = document.getElementById('breed').value;
+
+      const tableBody = document.getElementById('dogTableBody');
+      const newRow = document.createElement('tr');
+
+      newRow.innerHTML = `
+        <td>${dogName}</td>
+        <td>${ownerName}</td>
+        <td>${breed}</td>
+      `;
+
+      tableBody.appendChild(newRow);
+
+      document.getElementById('dogForm').reset();
+    });
+  </script>
 </body>
 </html>
+
