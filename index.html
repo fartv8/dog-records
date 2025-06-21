@@ -54,6 +54,10 @@
       display: flex;
       gap: 10px;
     }
+    .timestamp {
+      font-size: 0.8em;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -102,22 +106,26 @@
         <td>${dog.name}</td>
         <td>${dog.owner}</td>
         <td>${dog.breed}</td>
-        <td><button onclick="checkIn(this)">Check In</button></td>
-        <td><button onclick="checkOut(this)">Check Out</button></td>
+        <td><button onclick="checkIn(this)">Check In</button><div class="timestamp"></div></td>
+        <td><button onclick="checkOut(this)">Check Out</button><div class="timestamp"></div></td>
       `;
       tableBody.appendChild(newRow);
     }
 
     function checkIn(button) {
-      const row = button.parentElement.parentElement;
+      const row = button.parentElement;
+      const timestamp = new Date().toLocaleString();
       button.textContent = '✔ Checked In';
       button.disabled = true;
+      row.querySelector('.timestamp').textContent = timestamp;
     }
 
     function checkOut(button) {
-      const row = button.parentElement.parentElement;
+      const row = button.parentElement;
+      const timestamp = new Date().toLocaleString();
       button.textContent = '✔ Checked Out';
       button.disabled = true;
+      row.querySelector('.timestamp').textContent = timestamp;
     }
 
     form.addEventListener('submit', function(event) {
