@@ -23,23 +23,15 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    form label {
-      font-weight: 600;
-      margin-top: 12px;
-      display: block;
-    }
     form input[type="text"],
-    form input[type="number"],
-    form input[type="tel"],
     form textarea,
     button {
       width: 100%;
       padding: 10px;
-      margin-top: 6px;
+      margin-top: 10px;
       margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-sizing: border-box;
     }
     table {
       width: 100%;
@@ -47,15 +39,12 @@
       margin-top: 20px;
       background-color: #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      table-layout: fixed;
-      word-wrap: break-word;
     }
     th,
     td {
       padding: 12px 15px;
       border: 1px solid #ddd;
       text-align: left;
-      vertical-align: middle;
     }
     th {
       background-color: #4caf50;
@@ -79,6 +68,7 @@
       padding: 10px 20px;
       font-size: 16px;
     }
+    /* Added container for the search inputs */
     .search-container {
       max-width: 500px;
       margin: 0 auto 10px auto;
@@ -91,48 +81,6 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
-    /* Phone numbers inputs */
-    #phoneNumbersContainer {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .phone-input-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .phone-input-group input {
-      flex: 1;
-    }
-    .phone-input-group button {
-      background-color: #c0392b;
-      border: none;
-      color: white;
-      padding: 6px 12px;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .phone-input-group button:hover {
-      background-color: #7a1c16;
-    }
-    #addPhoneBtn {
-      background-color: #27ae60;
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      font-weight: 700;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-top: 6px;
-      width: fit-content;
-      transition: background-color 0.3s ease;
-    }
-    #addPhoneBtn:hover {
-      background-color: #1c6d44;
-    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -140,42 +88,17 @@
 <body>
   <h1>Dog Records</h1>
 
-  <form id="dogForm" autocomplete="off" spellcheck="false">
-    <label for="dogName">Dog Name *</label>
-    <input type="text" id="dogName" placeholder="Enter dog's name" required />
-
-    <label for="ownerName">Owner Name *</label>
-    <input type="text" id="ownerName" placeholder="Enter owner's name" required />
-
-    <label for="breed">Breed *</label>
-    <input type="text" id="breed" placeholder="Enter dog's breed" required />
-
-    <label for="description">Grooming Instructions</label>
-    <textarea id="description" placeholder="Any grooming instructions..."></textarea>
-
-    <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
-      <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
-      <label><input type="checkbox" id="cologne" /> Cologne</label>
-    </div>
-
-    <label for="specialGrooming">Bathing Instructions (Optional)</label>
-    <input type="text" id="specialGrooming" placeholder="E.g., gentle shampoo, towel dry" />
-
-    <label for="price">Price *</label>
-    <input type="number" id="price" placeholder="Service price ($)" min="0" step="0.01" required />
-
-    <label>Phone Number(s) *</label>
-    <div id="phoneNumbersContainer">
-      <div class="phone-input-group">
-        <input type="tel" class="phoneNumberInput" placeholder="e.g., (555) 123-4567" pattern="[\d\s\-\+\(\)]{7,}" required />
-        <button type="button" class="removePhoneBtn" title="Remove phone number" style="display:none;">&times;</button>
-      </div>
-    </div>
-    <button type="button" id="addPhoneBtn">Add Another Phone Number</button>
-
-    <label for="address">Address *</label>
-    <input type="text" id="address" placeholder="Owner's address" required />
-
+  <form id="dogForm">
+    <input type="text" id="dogName" placeholder="Dog Name" required />
+    <input type="text" id="ownerName" placeholder="Owner Name" required />
+    <input type="text" id="breed" placeholder="Breed" required />
+    <textarea id="description" placeholder="Grooming Instructions"></textarea>
+    <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
+    <label><input type="checkbox" id="cologne" /> Cologne</label>
+    <input type="text" id="specialGrooming" placeholder="Bathing Instructions (optional)" />
+    <input type="text" id="price" placeholder="Price ($)" />
+    <input type="text" id="phoneNumbers" placeholder="Phone Number(s) separated by commas" />
+    <input type="text" id="address" placeholder="Address" />
     <button type="submit">Add Dog</button>
   </form>
 
@@ -194,15 +117,10 @@
     />
   </div>
 
-  <input
-    type="text"
-    id="ownerFilter"
-    placeholder="Enter owner name to print report"
-    style="max-width: 600px; margin: 0 auto 20px auto; display: block; padding: 12px; font-size: 1rem; border: 1.5px solid #bdc3c7; border-radius: 8px;"
-  />
+  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
   <button class="print-btn" onclick="printReport()">Print Owner Report</button>
 
-  <table aria-label="Dog records table" role="table">
+  <table>
     <thead>
       <tr>
         <th>Dog Name</th>
@@ -220,7 +138,9 @@
         <th>Actions</th>
       </tr>
     </thead>
-    <tbody id="dogTableBody"></tbody>
+    <tbody id="dogTableBody">
+      <!-- Dog entries will be added here -->
+    </tbody>
   </table>
 
   <script>
@@ -240,41 +160,9 @@
     const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
-    const phoneNumbersContainer = document.getElementById("phoneNumbersContainer");
-    const addPhoneBtn = document.getElementById("addPhoneBtn");
-
-    addPhoneBtn.addEventListener("click", () => {
-      const newPhoneGroup = document.createElement("div");
-      newPhoneGroup.classList.add("phone-input-group");
-      newPhoneGroup.innerHTML = `
-        <input type="tel" class="phoneNumberInput" placeholder="e.g., (555) 123-4567" pattern="[\d\s\-\+\(\)]{7,}" required />
-        <button type="button" class="removePhoneBtn" title="Remove phone number">&times;</button>
-      `;
-      phoneNumbersContainer.appendChild(newPhoneGroup);
-      updateRemoveButtons();
-    });
-
-    phoneNumbersContainer.addEventListener("click", (e) => {
-      if (e.target.classList.contains("removePhoneBtn")) {
-        const group = e.target.closest(".phone-input-group");
-        if (group) {
-          phoneNumbersContainer.removeChild(group);
-          updateRemoveButtons();
-        }
-      }
-    });
-
-    function updateRemoveButtons() {
-      const removeButtons = phoneNumbersContainer.querySelectorAll(".removePhoneBtn");
-      removeButtons.forEach(btn => btn.style.display = (removeButtons.length > 1) ? "inline-block" : "none");
-    }
-
     function addDogToTable(dog, id) {
       const newRow = document.createElement("tr");
       newRow.setAttribute("data-id", id);
-
-      const phonesDisplay = Array.isArray(dog.phoneNumbers) ? dog.phoneNumbers.join(", ") : (dog.phoneNumbers || "");
-
       newRow.innerHTML = `
         <td contenteditable="false">${dog.name}</td>
         <td contenteditable="false">${dog.owner}</td>
@@ -283,8 +171,8 @@
         <td contenteditable="false">${dog.vaccinated ? "Yes" : "No"}</td>
         <td contenteditable="false">${dog.cologne ? "Yes" : "No"}</td>
         <td contenteditable="false">${dog.specialGrooming || ""}</td>
-        <td contenteditable="false">${dog.price ? parseFloat(dog.price).toFixed(2) : ""}</td>
-        <td contenteditable="false">${phonesDisplay}</td>
+        <td contenteditable="false">${dog.price || ""}</td>
+        <td contenteditable="false">${dog.phoneNumbers || ""}</td>
         <td contenteditable="false">${dog.address || ""}</td>
         <td>
           <button onclick="checkIn('${id}')">Check In</button>
@@ -305,12 +193,19 @@
     }
 
     function filterTable() {
-      const dogFilter = document.getElementById("searchDog").value.trim().toLowerCase();
-      const ownerFilter = document.getElementById("searchOwner").value.trim().toLowerCase();
+      const dogFilter = document
+        .getElementById("searchDog")
+        .value.trim()
+        .toLowerCase();
+      const ownerFilter = document
+        .getElementById("searchOwner")
+        .value.trim()
+        .toLowerCase();
       tableBody.innerHTML = "";
       allRows.forEach((row) => {
         const dogName = row.children[0].textContent.trim().toLowerCase();
         const ownerName = row.children[1].textContent.trim().toLowerCase();
+
         if (dogName.includes(dogFilter) && ownerName.includes(ownerFilter)) {
           tableBody.appendChild(row);
         }
@@ -319,7 +214,7 @@
 
     function editDog(button) {
       const row = button.closest("tr");
-      row.querySelectorAll("td[contenteditable]").forEach(td => (td.contentEditable = true));
+      row.querySelectorAll("td[contenteditable]").forEach((td) => (td.contentEditable = true));
       button.style.display = "none";
       row.querySelector('button[onclick^="saveDog"]').style.display = "inline-block";
     }
@@ -327,10 +222,6 @@
     function saveDog(button, id) {
       const row = button.closest("tr");
       const cells = row.querySelectorAll("td");
-
-      const phoneNumbersRaw = cells[8].textContent.trim();
-      const phoneNumbersArr = phoneNumbersRaw.split(",").map(s => s.trim()).filter(s => s.length > 0);
-
       const updatedDog = {
         name: cells[0].textContent.trim(),
         owner: cells[1].textContent.trim(),
@@ -340,14 +231,13 @@
         cologne: cells[5].textContent.trim().toLowerCase() === "yes",
         specialGrooming: cells[6].textContent.trim(),
         price: cells[7].textContent.trim(),
-        phoneNumbers: phoneNumbersArr,
+        phoneNumbers: cells[8].textContent.trim(),
         address: cells[9].textContent.trim(),
         checkIn: row.querySelector(".timestamp")?.textContent || "",
         checkOut: row.querySelectorAll(".timestamp")[1]?.textContent || "",
       };
-
       db.ref("dogs/" + id).set(updatedDog);
-      row.querySelectorAll("td[contenteditable]").forEach(td => (td.contentEditable = false));
+      row.querySelectorAll("td[contenteditable]").forEach((td) => (td.contentEditable = false));
       button.style.display = "none";
       row.querySelector('button[onclick^="editDog"]').style.display = "inline-block";
     }
@@ -370,32 +260,94 @@
 
     function printReport() {
       const filterName = document.getElementById("ownerFilter").value.trim().toLowerCase();
-      const dogs = Array.from(tableBody.querySelectorAll("tr"));
-      const ownerGroups = {};
-      dogs.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        const owner = cells[1].textContent.trim();
-        if (filterName && owner.toLowerCase() !== filterName) return;
-        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Grooming Instructions: ${cells[3].textContent.trim()}, Vaccinated: ${cells[4].textContent.trim()}, Cologne: ${cells[5].textContent.trim()}, Bathing Instructions: ${cells[6].textContent.trim()}, Price: $${cells[7].textContent.trim()}, Phone(s): ${cells[8].textContent.trim()}, Address: ${cells[9].textContent.trim()}, In: ${cells[10].querySelector(".timestamp").textContent}, Out: ${cells[11].querySelector(".timestamp").textContent}`;
-        if (!ownerGroups[owner]) ownerGroups[owner] = [];
-        ownerGroups[owner].push(info);
-      });
-
-      let printContent = "";
-      for (const owner in ownerGroups) {
-        printContent += `\nOwner: ${owner}\n`;
-        printContent += ownerGroups[owner].join("\n") + "\n";
+      if (!filterName) {
+        alert("Please enter an owner name to print the report.");
+        return;
       }
 
-      const win = window.open("", "", "width=900,height=700");
-      win.document.write(`<pre style="font-family: monospace; font-size: 1rem; padding: 20px;">${printContent}</pre>`);
+      // Collect rows matching the owner filter
+      const dogs = Array.from(tableBody.querySelectorAll("tr")).filter(row => {
+        const owner = row.children[1].textContent.trim().toLowerCase();
+        return owner === filterName;
+      });
+
+      if (dogs.length === 0) {
+        alert("No records found for owner: " + filterName);
+        return;
+      }
+
+      // Build HTML for the report table (copy header from main table)
+      let reportHTML = `
+        <html>
+        <head>
+          <title>Owner Report - ${filterName}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+            h2 { text-align: center; margin-bottom: 20px; color: #333; }
+            table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
+            th { background-color: #4caf50; color: white; }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2>Dog Records for Owner: ${filterName}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Dog Name</th>
+                <th>Owner Name</th>
+                <th>Breed</th>
+                <th>Grooming Instructions</th>
+                <th>Vaccinated</th>
+                <th>Cologne</th>
+                <th>Bathing Instructions</th>
+                <th>Price ($)</th>
+                <th>Phone Number(s)</th>
+                <th>Address</th>
+                <th>Check In</th>
+                <th>Check Out</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      dogs.forEach(row => {
+        const cells = row.querySelectorAll("td");
+        reportHTML += `
+          <tr>
+            <td>${cells[0].textContent}</td>
+            <td>${cells[1].textContent}</td>
+            <td>${cells[2].textContent}</td>
+            <td>${cells[3].textContent}</td>
+            <td>${cells[4].textContent}</td>
+            <td>${cells[5].textContent}</td>
+            <td>${cells[6].textContent}</td>
+            <td>${cells[7].textContent}</td>
+            <td>${cells[8].textContent}</td>
+            <td>${cells[9].textContent}</td>
+            <td>${cells[10].querySelector(".timestamp")?.textContent || ""}</td>
+            <td>${cells[11].querySelector(".timestamp")?.textContent || ""}</td>
+          </tr>
+        `;
+      });
+
+      reportHTML += `
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+      const win = window.open("", "_blank", "width=1000,height=700");
+      win.document.write(reportHTML);
       win.document.close();
+      win.focus();
       win.print();
     }
 
     form.addEventListener("submit", function (event) {
       event.preventDefault();
-
       const name = document.getElementById("dogName").value.trim();
       const owner = document.getElementById("ownerName").value.trim();
       const breed = document.getElementById("breed").value.trim();
@@ -404,57 +356,18 @@
       const cologne = document.getElementById("cologne").checked;
       const specialGrooming = document.getElementById("specialGrooming").value.trim();
       const price = document.getElementById("price").value.trim();
+      const phoneNumbers = document.getElementById("phoneNumbers").value.trim();
       const address = document.getElementById("address").value.trim();
 
-      const phoneInputs = document.querySelectorAll(".phoneNumberInput");
-      const phoneNumbers = Array.from(phoneInputs).map(input => input.value.trim()).filter(p => p.length > 0);
-
-      if (!name || !owner || !breed || !price || phoneNumbers.length === 0 || !address) {
-        alert("Please fill out all required fields marked with * and provide at least one phone number.");
+      if (!name || !owner || !breed) {
+        alert("Please fill out all required fields.");
         return;
-      }
-
-      if (isNaN(price) || Number(price) < 0) {
-        alert("Please enter a valid non-negative price.");
-        return;
-      }
-
-      const phonePattern = /^[\d\s\-\+\(\)]{7,}$/;
-      for (const phone of phoneNumbers) {
-        if (!phonePattern.test(phone)) {
-          alert(`Phone number "${phone}" is invalid. Please enter a valid phone number.`);
-          return;
-        }
       }
 
       const newDogRef = db.ref("dogs").push();
-      newDogRef.set({
-        name,
-        owner,
-        breed,
-        description,
-        vaccinated,
-        cologne,
-        specialGrooming,
-        price: Number(price).toFixed(2),
-        phoneNumbers,
-        address,
-        checkIn: "",
-        checkOut: ""
-      });
-
-      resetForm();
-    });
-
-    function resetForm() {
+      newDogRef.set({ name, owner, breed, description, vaccinated, cologne, specialGrooming, price, phoneNumbers, address });
       form.reset();
-      phoneNumbersContainer.innerHTML = `
-        <div class="phone-input-group">
-          <input type="tel" class="phoneNumberInput" placeholder="e.g., (555) 123-4567" pattern="[\d\s\-\+\(\)]{7,}" required />
-          <button type="button" class="removePhoneBtn" title="Remove phone number" style="display:none;">&times;</button>
-        </div>`;
-      updateRemoveButtons();
-    }
+    });
 
     function loadDogs() {
       db.ref("dogs").on("value", (snapshot) => {
@@ -470,7 +383,6 @@
     }
 
     loadDogs();
-    updateRemoveButtons();
   </script>
 </body>
 </html>
