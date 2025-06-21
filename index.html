@@ -5,35 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dog Records</title>
   <style>
-    /* ... same styles as before for form, table, buttons, etc. ... */
-
-    /* Add styles for multiple phone inputs container */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    form label {
+      font-weight: 600;
+      margin-top: 12px;
+      display: block;
+    }
+    form input[type="text"],
+    form input[type="number"],
+    form input[type="tel"],
+    form textarea,
+    button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th,
+    td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      text-align: left;
+      vertical-align: middle;
+    }
+    th {
+      background-color: #4caf50;
+      color: white;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+      margin-top: 5px;
+    }
+    .timestamp {
+      font-size: 0.8em;
+      color: #555;
+    }
+    .print-btn {
+      margin: 20px auto;
+      display: block;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+    .search-container {
+      max-width: 500px;
+      margin: 0 auto 10px auto;
+      display: flex;
+      gap: 10px;
+    }
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    /* Phone numbers inputs */
     #phoneNumbersContainer {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
-
-    #phoneNumbersContainer input {
-      width: 100%;
-      padding: 8px 12px;
-      border: 1.8px solid #bdc3c7;
-      border-radius: 6px;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
-    }
-
-    #phoneNumbersContainer input:focus {
-      border-color: #27ae60;
-      outline: none;
-    }
-
     .phone-input-group {
       display: flex;
       gap: 8px;
       align-items: center;
     }
-
+    .phone-input-group input {
+      flex: 1;
+    }
     .phone-input-group button {
       background-color: #c0392b;
       border: none;
@@ -47,7 +118,6 @@
     .phone-input-group button:hover {
       background-color: #7a1c16;
     }
-
     #addPhoneBtn {
       background-color: #27ae60;
       border: none;
@@ -63,15 +133,14 @@
     #addPhoneBtn:hover {
       background-color: #1c6d44;
     }
-
   </style>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>Dog Records</h1>
 
   <form id="dogForm" autocomplete="off" spellcheck="false">
-    <!-- ... other inputs as before ... -->
-
     <label for="dogName">Dog Name *</label>
     <input type="text" id="dogName" placeholder="Enter dog's name" required />
 
@@ -84,12 +153,9 @@
     <label for="description">Grooming Instructions</label>
     <textarea id="description" placeholder="Any grooming instructions..."></textarea>
 
-    <div class="checkbox-group" style="grid-column: span 2;">
-      <input type="checkbox" id="vaccinated" />
-      <label for="vaccinated" style="margin: 0; font-weight: 600; cursor: pointer;">Vaccinated</label>
-
-      <input type="checkbox" id="cologne" />
-      <label for="cologne" style="margin: 0; font-weight: 600; cursor: pointer;">Cologne</label>
+    <div style="display: flex; gap: 12px; align-items: center; margin-top: 10px;">
+      <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
+      <label><input type="checkbox" id="cologne" /> Cologne</label>
     </div>
 
     <label for="specialGrooming">Bathing Instructions (Optional)</label>
@@ -112,8 +178,6 @@
 
     <button type="submit">Add Dog</button>
   </form>
-
-  <!-- Search, print, and table remain unchanged except phone column to handle array -->
 
   <div class="search-container">
     <input
@@ -159,8 +223,6 @@
     <tbody id="dogTableBody"></tbody>
   </table>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyBLFMBvc4HF9atMxzY7Rf1u-oBJBAYZvTo",
@@ -178,7 +240,6 @@
     const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
-    // Add phone input dynamic behavior
     const phoneNumbersContainer = document.getElementById("phoneNumbersContainer");
     const addPhoneBtn = document.getElementById("addPhoneBtn");
 
@@ -193,7 +254,6 @@
       updateRemoveButtons();
     });
 
-    // Handle removing phone inputs
     phoneNumbersContainer.addEventListener("click", (e) => {
       if (e.target.classList.contains("removePhoneBtn")) {
         const group = e.target.closest(".phone-input-group");
@@ -206,7 +266,6 @@
 
     function updateRemoveButtons() {
       const removeButtons = phoneNumbersContainer.querySelectorAll(".removePhoneBtn");
-      // Only show remove buttons if more than 1 input present
       removeButtons.forEach(btn => btn.style.display = (removeButtons.length > 1) ? "inline-block" : "none");
     }
 
@@ -214,7 +273,6 @@
       const newRow = document.createElement("tr");
       newRow.setAttribute("data-id", id);
 
-      // Join phone numbers array into a comma-separated string
       const phonesDisplay = Array.isArray(dog.phoneNumbers) ? dog.phoneNumbers.join(", ") : (dog.phoneNumbers || "");
 
       newRow.innerHTML = `
@@ -270,7 +328,6 @@
       const row = button.closest("tr");
       const cells = row.querySelectorAll("td");
 
-      // Parse phone numbers from the comma separated string back into array
       const phoneNumbersRaw = cells[8].textContent.trim();
       const phoneNumbersArr = phoneNumbersRaw.split(",").map(s => s.trim()).filter(s => s.length > 0);
 
@@ -349,7 +406,6 @@
       const price = document.getElementById("price").value.trim();
       const address = document.getElementById("address").value.trim();
 
-      // Collect all phone numbers from inputs
       const phoneInputs = document.querySelectorAll(".phoneNumberInput");
       const phoneNumbers = Array.from(phoneInputs).map(input => input.value.trim()).filter(p => p.length > 0);
 
@@ -383,16 +439,22 @@
         price: Number(price).toFixed(2),
         phoneNumbers,
         address,
+        checkIn: "",
+        checkOut: ""
       });
 
+      resetForm();
+    });
+
+    function resetForm() {
       form.reset();
-      // Reset to one phone input field after submit
       phoneNumbersContainer.innerHTML = `
         <div class="phone-input-group">
           <input type="tel" class="phoneNumberInput" placeholder="e.g., (555) 123-4567" pattern="[\d\s\-\+\(\)]{7,}" required />
           <button type="button" class="removePhoneBtn" title="Remove phone number" style="display:none;">&times;</button>
         </div>`;
-    });
+      updateRemoveButtons();
+    }
 
     function loadDogs() {
       db.ref("dogs").on("value", (snapshot) => {
