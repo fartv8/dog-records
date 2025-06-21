@@ -63,10 +63,10 @@
       color: #555;
     }
     .print-btn {
-      margin: 20px auto;
-      display: block;
+      /* Removed width 100% to allow inline with input */
       padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
     }
     /* Added container for the search inputs */
     .search-container {
@@ -117,8 +117,25 @@
     />
   </div>
 
-  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
-  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
+  <!-- Improved owner report input + label + button -->
+  <div style="max-width: 500px; margin: 20px auto; display: flex; gap: 10px; align-items: center;">
+    <label for="ownerFilter" style="font-weight: bold; color: #333; min-width: 180px;">
+      Enter Owner Name to Print Report:
+    </label>
+    <input
+      type="text"
+      id="ownerFilter"
+      placeholder="Owner Name"
+      style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
+    />
+    <button
+      class="print-btn"
+      onclick="printReport()"
+      style="flex-shrink: 0; padding: 10px 20px;"
+    >
+      Print Owner Report
+    </button>
+  </div>
 
   <table>
     <thead>
