@@ -80,7 +80,10 @@
     <button type="submit">Add Dog</button>
   </form>
 
+  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
   <button class="print-btn" onclick="printReport()">Print Owner Report</button>
+
+  <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTableByOwner()" />
 
   <table>
     <thead>
@@ -114,6 +117,7 @@
 
     const form = document.getElementById('dogForm');
     const tableBody = document.getElementById('dogTableBody');
+    let allRows = [];
 
     function addDogToTable(dog, id) {
       const newRow = document.createElement('tr');
@@ -137,7 +141,19 @@
           <button onclick="deleteDog('${id}')">Delete</button>
         </td>
       `;
+      allRows.push(newRow);
       tableBody.appendChild(newRow);
+    }
+
+    function filterTableByOwner() {
+      const filter = document.getElementById('searchOwner').value.trim().toLowerCase();
+      tableBody.innerHTML = '';
+      allRows.forEach(row => {
+        const owner = row.children[1].textContent.trim().toLowerCase();
+        if (owner.includes(filter)) {
+          tableBody.appendChild(row);
+        }
+      });
     }
 
     function editDog(button) {
@@ -181,11 +197,13 @@
     }
 
     function printReport() {
+      const filterName = document.getElementById('ownerFilter').value.trim().toLowerCase();
       const dogs = Array.from(tableBody.querySelectorAll('tr'));
       const ownerGroups = {};
       dogs.forEach(row => {
         const cells = row.querySelectorAll('td');
         const owner = cells[1].textContent.trim();
+        if (filterName && owner.toLowerCase() !== filterName) return;
         const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Desc: ${cells[3].textContent.trim()}, In: ${cells[4].querySelector('.timestamp').textContent}, Out: ${cells[5].querySelector('.timestamp').textContent}`;
         if (!ownerGroups[owner]) ownerGroups[owner] = [];
         ownerGroups[owner].push(info);
@@ -223,6 +241,7 @@
     function loadDogs() {
       db.ref('dogs').on('value', snapshot => {
         tableBody.innerHTML = '';
+        allRows = [];
         const dogs = snapshot.val();
         if (dogs) {
           Object.entries(dogs).forEach(([id, dog]) => {
