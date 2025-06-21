@@ -59,6 +59,12 @@
       font-size: 0.8em;
       color: #555;
     }
+    .print-btn {
+      margin: 20px auto;
+      display: block;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -73,6 +79,8 @@
     <textarea id="description" placeholder="Description"></textarea>
     <button type="submit">Add Dog</button>
   </form>
+
+  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
 
   <table>
     <thead>
@@ -170,6 +178,29 @@
     function checkOut(id) {
       const time = new Date().toLocaleString();
       db.ref('dogs/' + id + '/checkOut').set(time);
+    }
+
+    function printReport() {
+      const dogs = Array.from(tableBody.querySelectorAll('tr'));
+      const ownerGroups = {};
+      dogs.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        const owner = cells[1].textContent.trim();
+        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Desc: ${cells[3].textContent.trim()}, In: ${cells[4].querySelector('.timestamp').textContent}, Out: ${cells[5].querySelector('.timestamp').textContent}`;
+        if (!ownerGroups[owner]) ownerGroups[owner] = [];
+        ownerGroups[owner].push(info);
+      });
+
+      let printContent = '';
+      for (const owner in ownerGroups) {
+        printContent += `\nOwner: ${owner}\n`;
+        printContent += ownerGroups[owner].join('\n') + '\n';
+      }
+
+      const win = window.open('', '', 'width=800,height=600');
+      win.document.write(`<pre>${printContent}</pre>`);
+      win.document.close();
+      win.print();
     }
 
     form.addEventListener('submit', function(event) {
