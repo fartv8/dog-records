@@ -92,10 +92,10 @@
     <input type="text" id="dogName" placeholder="Dog Name" required />
     <input type="text" id="ownerName" placeholder="Owner Name" required />
     <input type="text" id="breed" placeholder="Breed" required />
-    <textarea id="description" placeholder="Grooming Supplies"></textarea>
+    <textarea id="description" placeholder="Grooming Instructions"></textarea>
     <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
     <label><input type="checkbox" id="cologne" /> Cologne</label>
-    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)" />
+    <input type="text" id="specialGrooming" placeholder="Bathing Instructions (optional)" />
     <button type="submit">Add Dog</button>
   </form>
 
@@ -123,10 +123,10 @@
         <th>Dog Name</th>
         <th>Owner Name</th>
         <th>Breed</th>
-        <th>Grooming Supplies</th>
+        <th>Grooming Instructions</th>
         <th>Vaccinated</th>
         <th>Cologne</th>
-        <th>Special Grooming</th>
+        <th>Bathing Instructions</th>
         <th>Check In</th>
         <th>Check Out</th>
         <th>Actions</th>
@@ -254,7 +254,7 @@
         const cells = row.querySelectorAll("td");
         const owner = cells[1].textContent.trim();
         if (filterName && owner.toLowerCase() !== filterName) return;
-        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Grooming Supplies: ${cells[3].textContent.trim()}, Vaccinated: ${cells[4].textContent.trim()}, Cologne: ${cells[5].textContent.trim()}, Special Grooming: ${cells[6].textContent.trim()}, In: ${cells[7].querySelector(".timestamp").textContent}, Out: ${cells[8].querySelector(".timestamp").textContent}`;
+        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Grooming Instructions: ${cells[3].textContent.trim()}, Vaccinated: ${cells[4].textContent.trim()}, Cologne: ${cells[5].textContent.trim()}, Bathing Instructions: ${cells[6].textContent.trim()}, In: ${cells[7].querySelector(".timestamp").textContent}, Out: ${cells[8].querySelector(".timestamp").textContent}`;
         if (!ownerGroups[owner]) ownerGroups[owner] = [];
         ownerGroups[owner].push(info);
       });
