@@ -78,6 +78,8 @@
     <input type="text" id="breed" placeholder="Breed" required>
     <textarea id="description" placeholder="Description"></textarea>
     <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
+    <label><input type="checkbox" id="cologne"> Cologne</label>
+    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)">
     <button type="submit">Add Dog</button>
   </form>
 
@@ -94,6 +96,8 @@
         <th>Breed</th>
         <th>Description</th>
         <th>Vaccinated</th>
+        <th>Cologne</th>
+        <th>Special Grooming</th>
         <th>Check In</th>
         <th>Check Out</th>
         <th>Actions</th>
@@ -130,6 +134,8 @@
         <td contenteditable="false">${dog.breed}</td>
         <td contenteditable="false">${dog.description || ''}</td>
         <td contenteditable="false">${dog.vaccinated ? 'Yes' : 'No'}</td>
+        <td contenteditable="false">${dog.cologne ? 'Yes' : 'No'}</td>
+        <td contenteditable="false">${dog.specialGrooming || ''}</td>
         <td>
           <button onclick="checkIn('${id}')">Check In</button>
           <div class="timestamp">${dog.checkIn || ''}</div>
@@ -175,6 +181,8 @@
         breed: cells[2].textContent.trim(),
         description: cells[3].textContent.trim(),
         vaccinated: cells[4].textContent.trim().toLowerCase() === 'yes',
+        cologne: cells[5].textContent.trim().toLowerCase() === 'yes',
+        specialGrooming: cells[6].textContent.trim(),
         checkIn: row.querySelector('.timestamp')?.textContent || '',
         checkOut: row.querySelectorAll('.timestamp')[1]?.textContent || ''
       };
@@ -208,7 +216,7 @@
         const cells = row.querySelectorAll('td');
         const owner = cells[1].textContent.trim();
         if (filterName && owner.toLowerCase() !== filterName) return;
-        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Desc: ${cells[3].textContent.trim()}, Vaccinated: ${cells[4].textContent.trim()}, In: ${cells[5].querySelector('.timestamp').textContent}, Out: ${cells[6].querySelector('.timestamp').textContent}`;
+        const info = `Dog: ${cells[0].textContent.trim()}, Breed: ${cells[2].textContent.trim()}, Desc: ${cells[3].textContent.trim()}, Vaccinated: ${cells[4].textContent.trim()}, Cologne: ${cells[5].textContent.trim()}, Special Grooming: ${cells[6].textContent.trim()}, In: ${cells[7].querySelector('.timestamp').textContent}, Out: ${cells[8].querySelector('.timestamp').textContent}`;
         if (!ownerGroups[owner]) ownerGroups[owner] = [];
         ownerGroups[owner].push(info);
       });
@@ -232,6 +240,8 @@
       const breed = document.getElementById('breed').value.trim();
       const description = document.getElementById('description').value.trim();
       const vaccinated = document.getElementById('vaccinated').checked;
+      const cologne = document.getElementById('cologne').checked;
+      const specialGrooming = document.getElementById('specialGrooming').value.trim();
 
       if (!name || !owner || !breed) {
         alert('Please fill out all fields.');
@@ -239,7 +249,7 @@
       }
 
       const newDogRef = db.ref('dogs').push();
-      newDogRef.set({ name, owner, breed, description, vaccinated });
+      newDogRef.set({ name, owner, breed, description, vaccinated, cologne, specialGrooming });
       form.reset();
     });
 
