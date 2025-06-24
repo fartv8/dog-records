@@ -48,17 +48,28 @@
       margin-top: 10px;
       margin-bottom: 10px;
     }
+    /* Updated phone number row styles */
     .phone-number-row {
       display: flex;
       gap: 10px;
       margin-bottom: 5px;
+      align-items: center;
     }
     .phone-number-row input[type="text"] {
-      flex: 1;
+      flex-grow: 1;
+      min-width: 0;
+      padding: 12px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
     .phone-number-row button {
       flex-shrink: 0;
       padding: 6px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 4px;
     }
     table {
       width: 100%;
@@ -435,162 +446,166 @@
             if (td.classList.contains("action-buttons") || td.querySelector(".timestamp"))
               return;
             td.contentEditable = "false";
-            td.style.cursor = "";
             td.onclick = null;
           });
 
           button.style.display = "none";
           const editBtn = row.querySelector('button[onclick^="editDog"]');
           if (editBtn) editBtn.style.display = "inline-block";
-        })
-        .catch((err) => {
-          alert("Error saving data: " + err.message);
         });
     }
 
     function deleteDog(id) {
-      if (!confirm("Are you sure you want to delete this dog record?")) return;
-      db.ref("dogs/" + id)
-        .remove()
-        .then(() => {
-          const row = document.querySelector(`tr[data-id="${id}"]`);
-          if (row) row.remove();
-        })
-        .catch((err) => {
-          alert("Error deleting record: " + err.message);
-        });
+      if (confirm("Are you sure you want to delete this record?")) {
+        db.ref("dogs/" + id).remove();
+      }
     }
 
     function checkIn(id) {
       const now = new Date().toLocaleString();
       db.ref("dogs/" + id).update({ checkIn: now });
-      const row = document.querySelector(`tr[data-id="${id}"]`);
-      if (row) {
-        const checkInCell = row.children[15];
-        checkInCell.querySelector(".timestamp").textContent = now;
-      }
     }
 
     function checkOut(id) {
       const now = new Date().toLocaleString();
       db.ref("dogs/" + id).update({ checkOut: now });
-      const row = document.querySelector(`tr[data-id="${id}"]`);
-      if (row) {
-        const checkOutCell = row.children[16];
-        checkOutCell.querySelector(".timestamp").textContent = now;
-      }
     }
 
-    db.ref("dogs").on("value", (snapshot) => {
-      tableBody.innerHTML = "";
-      allRows = [];
-      const dogs = snapshot.val();
-      if (dogs) {
-        Object.entries(dogs).forEach(([id, dog]) => {
-          addDogToTable(dog, id);
+    db.ref("dogs").on("child_added", (snapshot) => {
+      const dog = snapshot.val();
+      addDogToTable(dog, snapshot.key);
+    });
+
+    db.ref("dogs").on("child_removed", (snapshot) => {
+      const id = snapshot.key;
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.remove();
+      }
+    });
+
+    db.ref("dogs").on("child_changed", (snapshot) => {
+      const dog = snapshot.val();
+      const id = snapshot.key;
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        row.querySelectorAll("td").forEach((td, index) => {
+          switch (index) {
+            case 0:
+              td.textContent = dog.name;
+              break;
+            case 1:
+              td.textContent = dog.owner;
+              break;
+            case 2:
+              td.textContent = dog.breed;
+              break;
+            case 3:
+              td.textContent = dog.description || "";
+              break;
+            case 4:
+              td.textContent = dog.vaccinated ? "Yes" : "No";
+              break;
+            case 5:
+              td.textContent = dog.cologne ? "Yes" : "No";
+              break;
+            case 6:
+              td.textContent = dog.specialGrooming || "";
+              break;
+            case 7:
+              td.textContent = dog.gender || "";
+              break;
+            case 8:
+              td.textContent = dog.streetAddress || "";
+              break;
+            case 9:
+              td.textContent = dog.city || "";
+              break;
+            case 10:
+              td.textContent = dog.state || "";
+              break;
+            case 11:
+              td.textContent = dog.zip || "";
+              break;
+            case 12:
+              td.textContent = dog.price || "";
+              break;
+            case 13:
+              td.textContent = (dog.phoneNumbers && dog.phoneNumbers.length)
+                ? dog.phoneNumbers.join(", ")
+                : "";
+              break;
+            case 14:
+              td.textContent = dog.veterinarian || "";
+              break;
+            case 15:
+              td.querySelector(".timestamp").textContent = dog.checkIn || "";
+              break;
+            case 16:
+              td.querySelector(".timestamp").textContent = dog.checkOut || "";
+              break;
+          }
         });
       }
     });
 
     function filterTable() {
       const filter = document.getElementById("searchInput").value.toLowerCase();
-      allRows.forEach((row) => {
-        const dogName = row.children[0].textContent.toLowerCase();
-        const ownerName = row.children[1].textContent.toLowerCase();
-        row.style.display =
-          dogName.includes(filter) || ownerName.includes(filter) ? "" : "none";
+      tableBody.querySelectorAll("tr").forEach((row) => {
+        const dogName = row.cells[0].textContent.toLowerCase();
+        const ownerName = row.cells[1].textContent.toLowerCase();
+        if (dogName.includes(filter) || ownerName.includes(filter)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
       });
     }
 
     function printReport() {
-      const owner = document.getElementById("ownerFilter").value.trim().toLowerCase();
-      if (!owner) {
-        alert("Please enter an owner name to print the report.");
-        return;
-      }
+      const ownerFilter = document.getElementById("ownerFilter").value.toLowerCase();
+      let printContent = `<h2>Report for Owner: ${ownerFilter}</h2>`;
+      printContent += `<table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse; width: 100%;">`;
+      printContent += `
+        <tr>
+          <th>Dog Name</th>
+          <th>Breed</th>
+          <th>Grooming Supplies</th>
+          <th>Vaccinated</th>
+          <th>Cologne</th>
+          <th>Special Grooming</th>
+          <th>Gender</th>
+          <th>Street Address</th>
+          <th>City</th>
+          <th>State</th>
+          <th>Zip</th>
+          <th>Price</th>
+          <th>Phone Numbers</th>
+          <th>Veterinarian</th>
+          <th>Check In</th>
+          <th>Check Out</th>
+        </tr>
+      `;
 
-      const filteredDogs = allRows.filter((row) =>
-        row.children[1].textContent.toLowerCase() === owner
-      );
-
-      if (filteredDogs.length === 0) {
-        alert("No records found for this owner.");
-        return;
-      }
-
-      let reportWindow = window.open("", "_blank");
-      reportWindow.document.write(`
-        <html>
-        <head>
-          <title>Dog Report for ${owner}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
-            h1 { text-align: center; color: #333; }
-            .dog-card {
-              background: white;
-              border-radius: 10px;
-              padding: 15px;
-              margin: 15px auto;
-              max-width: 600px;
-              box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-              border-left: 8px solid #4CAF50;
-            }
-            .dog-card h2 {
-              margin-top: 0;
-              margin-bottom: 10px;
-              color: #2e7d32;
-            }
-            .dog-info {
-              line-height: 1.5;
-            }
-            .dog-info strong {
-              display: inline-block;
-              width: 130px;
-              color: #4CAF50;
-            }
-            @media print {
-              body { margin: 0; }
-              .dog-card { box-shadow: none; border-left: 0; margin: 0 0 20px 0; }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>Dog Report for Owner: ${owner}</h1>
-      `);
-
-      filteredDogs.forEach((row) => {
-        reportWindow.document.write(`
-          <div class="dog-card">
-            <h2>${row.children[0].textContent}</h2>
-            <div class="dog-info">
-              <p><strong>Breed:</strong> ${row.children[2].textContent}</p>
-              <p><strong>Grooming Supplies:</strong> ${row.children[3].textContent}</p>
-              <p><strong>Vaccinated:</strong> ${row.children[4].textContent}</p>
-              <p><strong>Cologne:</strong> ${row.children[5].textContent}</p>
-              <p><strong>Special Grooming:</strong> ${row.children[6].textContent}</p>
-              <p><strong>Gender:</strong> ${row.children[7].textContent}</p>
-              <p><strong>Address:</strong> ${row.children[8].textContent}, ${row.children[9].textContent}, ${row.children[10].textContent} ${row.children[11].textContent}</p>
-              <p><strong>Price:</strong> ${row.children[12].textContent}</p>
-              <p><strong>Phone Numbers:</strong> ${row.children[13].textContent}</p>
-              <p><strong>Veterinarian:</strong> ${row.children[14].textContent}</p>
-              <p><strong>Check In:</strong> ${row.children[15].querySelector(".timestamp").textContent}</p>
-              <p><strong>Check Out:</strong> ${row.children[16].querySelector(".timestamp").textContent}</p>
-            </div>
-          </div>
-        `);
+      tableBody.querySelectorAll("tr").forEach((row) => {
+        const ownerName = row.cells[1].textContent.toLowerCase();
+        if (ownerName === ownerFilter) {
+          printContent += `<tr>`;
+          for (let i = 0; i <= 16; i++) {
+            if (i === 17) continue; // Skip actions column
+            let cellContent = row.cells[i].textContent;
+            printContent += `<td>${cellContent}</td>`;
+          }
+          printContent += `</tr>`;
+        }
       });
 
-      reportWindow.document.write(`
-          <script>
-            window.onload = function() {
-              window.print();
-            };
-          <\/script>
-        </body>
-        </html>
-      `);
+      printContent += `</table>`;
 
-      reportWindow.document.close();
+      const newWin = window.open("");
+      newWin.document.write(printContent);
+      newWin.print();
+      newWin.close();
     }
   </script>
 </body>
