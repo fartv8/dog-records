@@ -30,6 +30,7 @@
       margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
+      box-sizing: border-box;
     }
     .health-checklist {
       display: flex;
@@ -43,6 +44,22 @@
     .vet-info {
       margin-top: 15px;
     }
+    .phone-numbers-container {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .phone-number-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    .phone-number-row input[type="text"] {
+      flex: 1;
+    }
+    .phone-number-row button {
+      flex-shrink: 0;
+      padding: 6px 12px;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -54,6 +71,7 @@
       padding: 12px 15px;
       border: 1px solid #ddd;
       text-align: left;
+      vertical-align: middle;
     }
     th {
       background-color: #4CAF50;
@@ -112,6 +130,19 @@
     <input type="text" id="state" placeholder="State" />
     <input type="text" id="zip" placeholder="Zip Code" />
 
+    <!-- Price -->
+    <input type="text" id="price" placeholder="Price" />
+
+    <!-- Phone numbers -->
+    <div class="phone-numbers-container" id="phoneNumbersContainer">
+      <label>Phone Numbers:</label>
+      <div class="phone-number-row">
+        <input type="text" class="phoneNumber" placeholder="Phone Number" />
+        <button type="button" onclick="removePhoneNumber(this)">Remove</button>
+      </div>
+    </div>
+    <button type="button" onclick="addPhoneNumber()">Add Phone Number</button>
+
     <div class="health-checklist">
       <label><input type="checkbox" id="noisy" /> Noisy</label>
       <label><input type="checkbox" id="bites" /> Bites</label>
@@ -129,10 +160,7 @@
     <button type="submit">Add Dog</button>
   </form>
 
-  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
-  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
-
-  <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTableByOwner()" />
+  <input type="text" id="searchInput" placeholder="Search by Dog or Owner name" oninput="filterTable()" />
 
   <table>
     <thead>
@@ -149,6 +177,8 @@
         <th>City</th>
         <th>State</th>
         <th>Zip</th>
+        <th>Price</th>
+        <th>Phone Numbers</th>
         <th>Veterinarian</th>
         <th>Check In</th>
         <th>Check Out</th>
@@ -177,9 +207,28 @@
     const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
+    function addPhoneNumber() {
+      const container = document.getElementById("phoneNumbersContainer");
+      const row = document.createElement("div");
+      row.className = "phone-number-row";
+      row.innerHTML = `
+        <input type="text" class="phoneNumber" placeholder="Phone Number" />
+        <button type="button" onclick="removePhoneNumber(this)">Remove</button>
+      `;
+      container.appendChild(row);
+    }
+
+    function removePhoneNumber(button) {
+      const row = button.parentElement;
+      row.remove();
+    }
+
     function addDogToTable(dog, id) {
       const newRow = document.createElement("tr");
       newRow.setAttribute("data-id", id);
+      const phoneNumbersText = (dog.phoneNumbers && dog.phoneNumbers.length)
+        ? dog.phoneNumbers.join(", ")
+        : "";
       newRow.innerHTML = `
         <td contenteditable="false">${dog.name}</td>
         <td contenteditable="false">${dog.owner}</td>
@@ -193,6 +242,8 @@
         <td contenteditable="false">${dog.city || ""}</td>
         <td contenteditable="false">${dog.state || ""}</td>
         <td contenteditable="false">${dog.zip || ""}</td>
+        <td contenteditable="false">${dog.price || ""}</td>
+        <td contenteditable="false">${phoneNumbersText}</td>
         <td contenteditable="false">${dog.veterinarian || ""}</td>
         <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ""}</div></td>
         <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ""}</div></td>
@@ -222,6 +273,17 @@
       const city = document.getElementById("city").value.trim();
       const state = document.getElementById("state").value.trim();
       const zip = document.getElementById("zip").value.trim();
+
+      const price = document.getElementById("price").value.trim();
+
+      // Collect all phone numbers
+      const phoneInputs = document.querySelectorAll(".phoneNumber");
+      const phoneNumbers = [];
+      phoneInputs.forEach((input) => {
+        const val = input.value.trim();
+        if (val) phoneNumbers.push(val);
+      });
+
       const veterinarian = document.getElementById("veterinarian").value.trim();
 
       const noisy = document.getElementById("noisy").checked;
@@ -251,6 +313,8 @@
         city,
         state,
         zip,
+        price,
+        phoneNumbers,
         veterinarian,
         noisy,
         bites,
@@ -261,6 +325,16 @@
         otherHealth,
       });
       form.reset();
+
+      // Reset phone numbers container to single empty input
+      const container = document.getElementById("phoneNumbersContainer");
+      container.innerHTML = `
+        <label>Phone Numbers:</label>
+        <div class="phone-number-row">
+          <input type="text" class="phoneNumber" placeholder="Phone Number" />
+          <button type="button" onclick="removePhoneNumber(this)">Remove</button>
+        </div>
+      `;
     });
 
     function editDog(button) {
@@ -268,13 +342,32 @@
       row.querySelectorAll("td").forEach((td, i) => {
         if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
 
-        if (i === 7) {
+        // Editable fields indices:
+        // 0: name, 1: owner, 2: breed, 3: description,
+        // 4: vaccinated, 5: cologne, 6: specialGrooming,
+        // 7: gender, 8: streetAddress, 9: city, 10: state,
+        // 11: zip, 12: price, 13: phoneNumbers, 14: veterinarian
+
+        if (i === 4 || i === 5) {
+          // vaccinated & cologne: toggle Yes/No on click
+          td.style.cursor = "pointer";
+          td.onclick = function () {
+            td.textContent = td.textContent === "Yes" ? "No" : "Yes";
+          };
+        } else if (i === 7) {
           // Gender column
           const genderText = td.textContent.trim();
           td.innerHTML = `
             <label><input type="radio" name="genderEdit${row.dataset.id}" value="Male" ${genderText === "Male" ? "checked" : ""}> Male</label>
             <label><input type="radio" name="genderEdit${row.dataset.id}" value="Female" ${genderText === "Female" ? "checked" : ""}> Female</label>
           `;
+        } else if (i === 13) {
+          // Phone numbers editable: show comma separated as textarea for editing
+          const phoneNumbers = td.textContent.trim();
+          td.innerHTML = `<textarea rows="2" style="width: 100%;">${phoneNumbers}</textarea>`;
+        } else if (i === 12) {
+          // Price editable
+          td.contentEditable = "true";
         } else {
           td.contentEditable = "true";
         }
@@ -310,7 +403,21 @@
       data.city = tds[9].textContent.trim();
       data.state = tds[10].textContent.trim();
       data.zip = tds[11].textContent.trim();
-      data.veterinarian = tds[12].textContent.trim();
+
+      data.price = tds[12].textContent.trim();
+
+      // Phone numbers from textarea split by comma
+      const phoneTextarea = tds[13].querySelector("textarea");
+      if (phoneTextarea) {
+        data.phoneNumbers = phoneTextarea.value
+          .split(",")
+          .map((num) => num.trim())
+          .filter((num) => num.length > 0);
+      } else {
+        data.phoneNumbers = [];
+      }
+
+      data.veterinarian = tds[14].textContent.trim();
 
       db.ref("dogs/" + id)
         .update(data)
@@ -327,11 +434,15 @@
           tds[9].textContent = data.city;
           tds[10].textContent = data.state;
           tds[11].textContent = data.zip;
-          tds[12].textContent = data.veterinarian;
+          tds[12].textContent = data.price;
+          tds[13].textContent = data.phoneNumbers.join(", ");
+          tds[14].textContent = data.veterinarian;
 
           tds.forEach((td, i) => {
             if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
             td.contentEditable = "false";
+            td.style.cursor = "";
+            td.onclick = null;
           });
 
           button.style.display = "none";
@@ -361,7 +472,7 @@
       db.ref("dogs/" + id).update({ checkIn: now });
       const row = document.querySelector(`tr[data-id="${id}"]`);
       if (row) {
-        const checkInCell = row.children[13];
+        const checkInCell = row.children[15];
         checkInCell.querySelector(".timestamp").textContent = now;
       }
     }
@@ -371,7 +482,7 @@
       db.ref("dogs/" + id).update({ checkOut: now });
       const row = document.querySelector(`tr[data-id="${id}"]`);
       if (row) {
-        const checkOutCell = row.children[14];
+        const checkOutCell = row.children[16];
         checkOutCell.querySelector(".timestamp").textContent = now;
       }
     }
@@ -388,18 +499,14 @@
       }
     });
 
-    // Example filterTableByOwner function (can be improved)
-    function filterTableByOwner() {
-      const filter = document.getElementById("searchOwner").value.toLowerCase();
+    function filterTable() {
+      const filter = document.getElementById("searchInput").value.toLowerCase();
       allRows.forEach((row) => {
+        const dogName = row.children[0].textContent.toLowerCase();
         const ownerName = row.children[1].textContent.toLowerCase();
-        row.style.display = ownerName.includes(filter) ? "" : "none";
+        row.style.display =
+          dogName.includes(filter) || ownerName.includes(filter) ? "" : "none";
       });
-    }
-
-    // Stub for printReport (implement as needed)
-    function printReport() {
-      alert("Print report functionality not yet implemented.");
     }
   </script>
 </body>
