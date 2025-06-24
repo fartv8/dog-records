@@ -94,6 +94,7 @@
       display: block;
       padding: 10px 20px;
       font-size: 16px;
+      cursor: pointer;
     }
     .gender-radio {
       margin-top: 10px;
@@ -161,6 +162,9 @@
   </form>
 
   <input type="text" id="searchInput" placeholder="Search by Dog or Owner name" oninput="filterTable()" />
+
+  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
+  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
 
   <table>
     <thead>
@@ -342,31 +346,21 @@
       row.querySelectorAll("td").forEach((td, i) => {
         if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
 
-        // Editable fields indices:
-        // 0: name, 1: owner, 2: breed, 3: description,
-        // 4: vaccinated, 5: cologne, 6: specialGrooming,
-        // 7: gender, 8: streetAddress, 9: city, 10: state,
-        // 11: zip, 12: price, 13: phoneNumbers, 14: veterinarian
-
         if (i === 4 || i === 5) {
-          // vaccinated & cologne: toggle Yes/No on click
           td.style.cursor = "pointer";
           td.onclick = function () {
             td.textContent = td.textContent === "Yes" ? "No" : "Yes";
           };
         } else if (i === 7) {
-          // Gender column
           const genderText = td.textContent.trim();
           td.innerHTML = `
             <label><input type="radio" name="genderEdit${row.dataset.id}" value="Male" ${genderText === "Male" ? "checked" : ""}> Male</label>
             <label><input type="radio" name="genderEdit${row.dataset.id}" value="Female" ${genderText === "Female" ? "checked" : ""}> Female</label>
           `;
         } else if (i === 13) {
-          // Phone numbers editable: show comma separated as textarea for editing
           const phoneNumbers = td.textContent.trim();
           td.innerHTML = `<textarea rows="2" style="width: 100%;">${phoneNumbers}</textarea>`;
         } else if (i === 12) {
-          // Price editable
           td.contentEditable = "true";
         } else {
           td.contentEditable = "true";
@@ -406,7 +400,6 @@
 
       data.price = tds[12].textContent.trim();
 
-      // Phone numbers from textarea split by comma
       const phoneTextarea = tds[13].querySelector("textarea");
       if (phoneTextarea) {
         data.phoneNumbers = phoneTextarea.value
@@ -439,7 +432,8 @@
           tds[14].textContent = data.veterinarian;
 
           tds.forEach((td, i) => {
-            if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
+            if (td.classList.contains("action-buttons") || td.querySelector(".timestamp"))
+              return;
             td.contentEditable = "false";
             td.style.cursor = "";
             td.onclick = null;
@@ -487,7 +481,6 @@
       }
     }
 
-    // Load existing dogs from Firebase and populate table
     db.ref("dogs").on("value", (snapshot) => {
       tableBody.innerHTML = "";
       allRows = [];
@@ -507,6 +500,97 @@
         row.style.display =
           dogName.includes(filter) || ownerName.includes(filter) ? "" : "none";
       });
+    }
+
+    function printReport() {
+      const owner = document.getElementById("ownerFilter").value.trim().toLowerCase();
+      if (!owner) {
+        alert("Please enter an owner name to print the report.");
+        return;
+      }
+
+      const filteredDogs = allRows.filter((row) =>
+        row.children[1].textContent.toLowerCase() === owner
+      );
+
+      if (filteredDogs.length === 0) {
+        alert("No records found for this owner.");
+        return;
+      }
+
+      let reportWindow = window.open("", "_blank");
+      reportWindow.document.write(`
+        <html>
+        <head>
+          <title>Dog Report for ${owner}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; background: #f9f9f9; }
+            h1 { text-align: center; color: #333; }
+            .dog-card {
+              background: white;
+              border-radius: 10px;
+              padding: 15px;
+              margin: 15px auto;
+              max-width: 600px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+              border-left: 8px solid #4CAF50;
+            }
+            .dog-card h2 {
+              margin-top: 0;
+              margin-bottom: 10px;
+              color: #2e7d32;
+            }
+            .dog-info {
+              line-height: 1.5;
+            }
+            .dog-info strong {
+              display: inline-block;
+              width: 130px;
+              color: #4CAF50;
+            }
+            @media print {
+              body { margin: 0; }
+              .dog-card { box-shadow: none; border-left: 0; margin: 0 0 20px 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Dog Report for Owner: ${owner}</h1>
+      `);
+
+      filteredDogs.forEach((row) => {
+        reportWindow.document.write(`
+          <div class="dog-card">
+            <h2>${row.children[0].textContent}</h2>
+            <div class="dog-info">
+              <p><strong>Breed:</strong> ${row.children[2].textContent}</p>
+              <p><strong>Grooming Supplies:</strong> ${row.children[3].textContent}</p>
+              <p><strong>Vaccinated:</strong> ${row.children[4].textContent}</p>
+              <p><strong>Cologne:</strong> ${row.children[5].textContent}</p>
+              <p><strong>Special Grooming:</strong> ${row.children[6].textContent}</p>
+              <p><strong>Gender:</strong> ${row.children[7].textContent}</p>
+              <p><strong>Address:</strong> ${row.children[8].textContent}, ${row.children[9].textContent}, ${row.children[10].textContent} ${row.children[11].textContent}</p>
+              <p><strong>Price:</strong> ${row.children[12].textContent}</p>
+              <p><strong>Phone Numbers:</strong> ${row.children[13].textContent}</p>
+              <p><strong>Veterinarian:</strong> ${row.children[14].textContent}</p>
+              <p><strong>Check In:</strong> ${row.children[15].querySelector(".timestamp").textContent}</p>
+              <p><strong>Check Out:</strong> ${row.children[16].querySelector(".timestamp").textContent}</p>
+            </div>
+          </div>
+        `);
+      });
+
+      reportWindow.document.write(`
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          <\/script>
+        </body>
+        </html>
+      `);
+
+      reportWindow.document.close();
     }
   </script>
 </body>
