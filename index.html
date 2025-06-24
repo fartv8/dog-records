@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dog Records</title>
   <style>
     body {
@@ -23,15 +23,25 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    form input[type="text"],
-    form textarea,
-    button {
+    form input[type="text"], form textarea, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
       margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
+    }
+    .health-checklist {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .health-checklist label {
+      width: 45%;
+    }
+    .vet-info {
+      margin-top: 15px;
     }
     table {
       width: 100%;
@@ -40,14 +50,13 @@
       background-color: #fff;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    th,
-    td {
+    th, td {
       padding: 12px 15px;
       border: 1px solid #ddd;
       text-align: left;
     }
     th {
-      background-color: #4caf50;
+      background-color: #4CAF50;
       color: white;
     }
     tr:nth-child(even) {
@@ -63,23 +72,10 @@
       color: #555;
     }
     .print-btn {
-      /* Removed width 100% to allow inline with input */
+      margin: 20px auto;
+      display: block;
       padding: 10px 20px;
       font-size: 16px;
-      cursor: pointer;
-    }
-    /* Added container for the search inputs */
-    .search-container {
-      max-width: 500px;
-      margin: 0 auto 10px auto;
-      display: flex;
-      gap: 10px;
-    }
-    .search-container input {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -89,53 +85,38 @@
   <h1>Dog Records</h1>
 
   <form id="dogForm">
-    <input type="text" id="dogName" placeholder="Dog Name" required />
-    <input type="text" id="ownerName" placeholder="Owner Name" required />
-    <input type="text" id="breed" placeholder="Breed" required />
-    <textarea id="description" placeholder="Grooming Instructions"></textarea>
-    <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
-    <label><input type="checkbox" id="cologne" /> Cologne</label>
-    <input type="text" id="specialGrooming" placeholder="Bathing Instructions (optional)" />
-    <input type="text" id="price" placeholder="Price ($)" />
-    <input type="text" id="phoneNumbers" placeholder="Phone Number(s) separated by commas" />
-    <input type="text" id="address" placeholder="Address" />
+    <input type="text" id="dogName" placeholder="Dog Name" required>
+    <input type="text" id="ownerName" placeholder="Owner Name" required>
+    <input type="text" id="breed" placeholder="Breed" required>
+    <textarea id="description" placeholder="Grooming Supplies"></textarea>
+    <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
+    <label><input type="checkbox" id="cologne"> Cologne</label>
+    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)">
+    <input type="text" id="city" placeholder="City">
+    <input type="text" id="state" placeholder="State">
+    <input type="text" id="zip" placeholder="Zip Code">
+
+    <div class="health-checklist">
+      <label><input type="checkbox" id="noisy"> Noisy</label>
+      <label><input type="checkbox" id="bites"> Bites</label>
+      <label><input type="checkbox" id="skinAllergy"> Skin Allergy</label>
+      <label><input type="checkbox" id="arthritic"> Arthritic</label>
+      <label><input type="checkbox" id="shy"> Shy</label>
+      <label><input type="checkbox" id="epileptic"> Epileptic</label>
+      <label><input type="text" id="otherHealth" placeholder="Other"></label>
+    </div>
+
+    <div class="vet-info">
+      <input type="text" id="veterinarian" placeholder="Veterinarian Name">
+    </div>
+
     <button type="submit">Add Dog</button>
   </form>
 
-  <div class="search-container">
-    <input
-      type="text"
-      id="searchDog"
-      placeholder="Search by dog name"
-      oninput="filterTable()"
-    />
-    <input
-      type="text"
-      id="searchOwner"
-      placeholder="Search by owner name"
-      oninput="filterTable()"
-    />
-  </div>
+  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
+  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
 
-  <!-- Improved owner report input + label + button -->
-  <div style="max-width: 500px; margin: 20px auto; display: flex; gap: 10px; align-items: center;">
-    <label for="ownerFilter" style="font-weight: bold; color: #333; min-width: 180px;">
-      Enter Owner Name to Print Report:
-    </label>
-    <input
-      type="text"
-      id="ownerFilter"
-      placeholder="Owner Name"
-      style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;"
-    />
-    <button
-      class="print-btn"
-      onclick="printReport()"
-      style="flex-shrink: 0; padding: 10px 20px;"
-    >
-      Print Owner Report
-    </button>
-  </div>
+  <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTableByOwner()" />
 
   <table>
     <thead>
@@ -143,13 +124,14 @@
         <th>Dog Name</th>
         <th>Owner Name</th>
         <th>Breed</th>
-        <th>Grooming Instructions</th>
+        <th>Grooming Supplies</th>
         <th>Vaccinated</th>
         <th>Cologne</th>
-        <th>Bathing Instructions</th>
-        <th>Price ($)</th>
-        <th>Phone Number(s)</th>
-        <th>Address</th>
+        <th>Special Grooming</th>
+        <th>City</th>
+        <th>State</th>
+        <th>Zip</th>
+        <th>Veterinarian</th>
         <th>Check In</th>
         <th>Check Out</th>
         <th>Actions</th>
@@ -167,38 +149,33 @@
       projectId: "dog-records-656c0",
       storageBucket: "dog-records-656c0.appspot.com",
       messagingSenderId: "347010811100",
-      appId: "1:347010811100:web:e32d9e95f860b2d16fa019",
+      appId: "1:347010811100:web:e32d9e95f860b2d16fa019"
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const form = document.getElementById("dogForm");
-    const tableBody = document.getElementById("dogTableBody");
+    const form = document.getElementById('dogForm');
+    const tableBody = document.getElementById('dogTableBody');
     let allRows = [];
 
     function addDogToTable(dog, id) {
-      const newRow = document.createElement("tr");
-      newRow.setAttribute("data-id", id);
+      const newRow = document.createElement('tr');
+      newRow.setAttribute('data-id', id);
       newRow.innerHTML = `
         <td contenteditable="false">${dog.name}</td>
         <td contenteditable="false">${dog.owner}</td>
         <td contenteditable="false">${dog.breed}</td>
-        <td contenteditable="false">${dog.description || ""}</td>
-        <td contenteditable="false">${dog.vaccinated ? "Yes" : "No"}</td>
-        <td contenteditable="false">${dog.cologne ? "Yes" : "No"}</td>
-        <td contenteditable="false">${dog.specialGrooming || ""}</td>
-        <td contenteditable="false">${dog.price || ""}</td>
-        <td contenteditable="false">${dog.phoneNumbers || ""}</td>
-        <td contenteditable="false">${dog.address || ""}</td>
-        <td>
-          <button onclick="checkIn('${id}')">Check In</button>
-          <div class="timestamp">${dog.checkIn || ""}</div>
-        </td>
-        <td>
-          <button onclick="checkOut('${id}')">Check Out</button>
-          <div class="timestamp">${dog.checkOut || ""}</div>
-        </td>
+        <td contenteditable="false">${dog.description || ''}</td>
+        <td contenteditable="false">${dog.vaccinated ? 'Yes' : 'No'}</td>
+        <td contenteditable="false">${dog.cologne ? 'Yes' : 'No'}</td>
+        <td contenteditable="false">${dog.specialGrooming || ''}</td>
+        <td contenteditable="false">${dog.city || ''}</td>
+        <td contenteditable="false">${dog.state || ''}</td>
+        <td contenteditable="false">${dog.zip || ''}</td>
+        <td contenteditable="false">${dog.veterinarian || ''}</td>
+        <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ''}</div></td>
+        <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ''}</div></td>
         <td class="action-buttons">
           <button onclick="editDog(this)">Edit</button>
           <button onclick="saveDog(this, '${id}')" style="display:none">Save</button>
@@ -209,197 +186,41 @@
       tableBody.appendChild(newRow);
     }
 
-    function filterTable() {
-      const dogFilter = document
-        .getElementById("searchDog")
-        .value.trim()
-        .toLowerCase();
-      const ownerFilter = document
-        .getElementById("searchOwner")
-        .value.trim()
-        .toLowerCase();
-      tableBody.innerHTML = "";
-      allRows.forEach((row) => {
-        const dogName = row.children[0].textContent.trim().toLowerCase();
-        const ownerName = row.children[1].textContent.trim().toLowerCase();
-
-        if (dogName.includes(dogFilter) && ownerName.includes(ownerFilter)) {
-          tableBody.appendChild(row);
-        }
-      });
-    }
-
-    function editDog(button) {
-      const row = button.closest("tr");
-      row.querySelectorAll("td[contenteditable]").forEach((td) => (td.contentEditable = true));
-      button.style.display = "none";
-      row.querySelector('button[onclick^="saveDog"]').style.display = "inline-block";
-    }
-
-    function saveDog(button, id) {
-      const row = button.closest("tr");
-      const cells = row.querySelectorAll("td");
-      const updatedDog = {
-        name: cells[0].textContent.trim(),
-        owner: cells[1].textContent.trim(),
-        breed: cells[2].textContent.trim(),
-        description: cells[3].textContent.trim(),
-        vaccinated: cells[4].textContent.trim().toLowerCase() === "yes",
-        cologne: cells[5].textContent.trim().toLowerCase() === "yes",
-        specialGrooming: cells[6].textContent.trim(),
-        price: cells[7].textContent.trim(),
-        phoneNumbers: cells[8].textContent.trim(),
-        address: cells[9].textContent.trim(),
-        checkIn: row.querySelector(".timestamp")?.textContent || "",
-        checkOut: row.querySelectorAll(".timestamp")[1]?.textContent || "",
-      };
-      db.ref("dogs/" + id).set(updatedDog);
-      row.querySelectorAll("td[contenteditable]").forEach((td) => (td.contentEditable = false));
-      button.style.display = "none";
-      row.querySelector('button[onclick^="editDog"]').style.display = "inline-block";
-    }
-
-    function deleteDog(id) {
-      if (confirm("Are you sure you want to delete this dog?")) {
-        db.ref("dogs/" + id).remove();
-      }
-    }
-
-    function checkIn(id) {
-      const time = new Date().toLocaleString();
-      db.ref("dogs/" + id + "/checkIn").set(time);
-    }
-
-    function checkOut(id) {
-      const time = new Date().toLocaleString();
-      db.ref("dogs/" + id + "/checkOut").set(time);
-    }
-
-    function printReport() {
-      const filterName = document.getElementById("ownerFilter").value.trim().toLowerCase();
-      if (!filterName) {
-        alert("Please enter an owner name to print the report.");
-        return;
-      }
-
-      // Collect rows matching the owner filter
-      const dogs = Array.from(tableBody.querySelectorAll("tr")).filter(row => {
-        const owner = row.children[1].textContent.trim().toLowerCase();
-        return owner === filterName;
-      });
-
-      if (dogs.length === 0) {
-        alert("No records found for owner: " + filterName);
-        return;
-      }
-
-      // Build HTML for the report table (copy header from main table)
-      let reportHTML = `
-        <html>
-        <head>
-          <title>Owner Report - ${filterName}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-            h2 { text-align: center; margin-bottom: 20px; color: #333; }
-            table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
-            th { background-color: #4caf50; color: white; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h2>Dog Records for Owner: ${filterName}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Dog Name</th>
-                <th>Owner Name</th>
-                <th>Breed</th>
-                <th>Grooming Instructions</th>
-                <th>Vaccinated</th>
-                <th>Cologne</th>
-                <th>Bathing Instructions</th>
-                <th>Price ($)</th>
-                <th>Phone Number(s)</th>
-                <th>Address</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      dogs.forEach(row => {
-        const cells = row.querySelectorAll("td");
-        reportHTML += `
-          <tr>
-            <td>${cells[0].textContent}</td>
-            <td>${cells[1].textContent}</td>
-            <td>${cells[2].textContent}</td>
-            <td>${cells[3].textContent}</td>
-            <td>${cells[4].textContent}</td>
-            <td>${cells[5].textContent}</td>
-            <td>${cells[6].textContent}</td>
-            <td>${cells[7].textContent}</td>
-            <td>${cells[8].textContent}</td>
-            <td>${cells[9].textContent}</td>
-            <td>${cells[10].querySelector(".timestamp")?.textContent || ""}</td>
-            <td>${cells[11].querySelector(".timestamp")?.textContent || ""}</td>
-          </tr>
-        `;
-      });
-
-      reportHTML += `
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `;
-
-      const win = window.open("", "_blank", "width=1000,height=700");
-      win.document.write(reportHTML);
-      win.document.close();
-      win.focus();
-      win.print();
-    }
-
-    form.addEventListener("submit", function (event) {
+    form.addEventListener('submit', function(event) {
       event.preventDefault();
-      const name = document.getElementById("dogName").value.trim();
-      const owner = document.getElementById("ownerName").value.trim();
-      const breed = document.getElementById("breed").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const vaccinated = document.getElementById("vaccinated").checked;
-      const cologne = document.getElementById("cologne").checked;
-      const specialGrooming = document.getElementById("specialGrooming").value.trim();
-      const price = document.getElementById("price").value.trim();
-      const phoneNumbers = document.getElementById("phoneNumbers").value.trim();
-      const address = document.getElementById("address").value.trim();
+      const name = document.getElementById('dogName').value.trim();
+      const owner = document.getElementById('ownerName').value.trim();
+      const breed = document.getElementById('breed').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const vaccinated = document.getElementById('vaccinated').checked;
+      const cologne = document.getElementById('cologne').checked;
+      const specialGrooming = document.getElementById('specialGrooming').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const state = document.getElementById('state').value.trim();
+      const zip = document.getElementById('zip').value.trim();
+      const veterinarian = document.getElementById('veterinarian').value.trim();
+
+      const noisy = document.getElementById('noisy').checked;
+      const bites = document.getElementById('bites').checked;
+      const skinAllergy = document.getElementById('skinAllergy').checked;
+      const arthritic = document.getElementById('arthritic').checked;
+      const shy = document.getElementById('shy').checked;
+      const epileptic = document.getElementById('epileptic').checked;
+      const otherHealth = document.getElementById('otherHealth').value.trim();
 
       if (!name || !owner || !breed) {
-        alert("Please fill out all required fields.");
+        alert('Please fill out all fields.');
         return;
       }
 
-      const newDogRef = db.ref("dogs").push();
-      newDogRef.set({ name, owner, breed, description, vaccinated, cologne, specialGrooming, price, phoneNumbers, address });
+      const newDogRef = db.ref('dogs').push();
+      newDogRef.set({
+        name, owner, breed, description, vaccinated, cologne,
+        specialGrooming, city, state, zip, veterinarian,
+        noisy, bites, skinAllergy, arthritic, shy, epileptic, otherHealth
+      });
       form.reset();
     });
-
-    function loadDogs() {
-      db.ref("dogs").on("value", (snapshot) => {
-        tableBody.innerHTML = "";
-        allRows = [];
-        const dogs = snapshot.val();
-        if (dogs) {
-          Object.entries(dogs).forEach(([id, dog]) => {
-            addDogToTable(dog, id);
-          });
-        }
-      });
-    }
-
-    loadDogs();
   </script>
 </body>
 </html>
