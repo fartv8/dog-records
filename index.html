@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dog Records</title>
   <style>
     body {
@@ -77,6 +77,13 @@
       padding: 10px 20px;
       font-size: 16px;
     }
+    .gender-radio {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+    .gender-radio label {
+      margin-right: 15px;
+    }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -85,29 +92,38 @@
   <h1>Dog Records</h1>
 
   <form id="dogForm">
-    <input type="text" id="dogName" placeholder="Dog Name" required>
-    <input type="text" id="ownerName" placeholder="Owner Name" required>
-    <input type="text" id="breed" placeholder="Breed" required>
+    <input type="text" id="dogName" placeholder="Dog Name" required />
+    <input type="text" id="ownerName" placeholder="Owner Name" required />
+    <input type="text" id="breed" placeholder="Breed" required />
     <textarea id="description" placeholder="Grooming Supplies"></textarea>
-    <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
-    <label><input type="checkbox" id="cologne"> Cologne</label>
-    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)">
-    <input type="text" id="city" placeholder="City">
-    <input type="text" id="state" placeholder="State">
-    <input type="text" id="zip" placeholder="Zip Code">
+    <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
+    <label><input type="checkbox" id="cologne" /> Cologne</label>
+    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)" />
+
+    <!-- Gender radio buttons -->
+    <div class="gender-radio">
+      <label><input type="radio" name="gender" id="male" value="Male" required /> Male</label>
+      <label><input type="radio" name="gender" id="female" value="Female" required /> Female</label>
+    </div>
+
+    <!-- Street Address -->
+    <input type="text" id="streetAddress" placeholder="Street Address" required />
+    <input type="text" id="city" placeholder="City" />
+    <input type="text" id="state" placeholder="State" />
+    <input type="text" id="zip" placeholder="Zip Code" />
 
     <div class="health-checklist">
-      <label><input type="checkbox" id="noisy"> Noisy</label>
-      <label><input type="checkbox" id="bites"> Bites</label>
-      <label><input type="checkbox" id="skinAllergy"> Skin Allergy</label>
-      <label><input type="checkbox" id="arthritic"> Arthritic</label>
-      <label><input type="checkbox" id="shy"> Shy</label>
-      <label><input type="checkbox" id="epileptic"> Epileptic</label>
-      <label><input type="text" id="otherHealth" placeholder="Other"></label>
+      <label><input type="checkbox" id="noisy" /> Noisy</label>
+      <label><input type="checkbox" id="bites" /> Bites</label>
+      <label><input type="checkbox" id="skinAllergy" /> Skin Allergy</label>
+      <label><input type="checkbox" id="arthritic" /> Arthritic</label>
+      <label><input type="checkbox" id="shy" /> Shy</label>
+      <label><input type="checkbox" id="epileptic" /> Epileptic</label>
+      <label><input type="text" id="otherHealth" placeholder="Other" /></label>
     </div>
 
     <div class="vet-info">
-      <input type="text" id="veterinarian" placeholder="Veterinarian Name">
+      <input type="text" id="veterinarian" placeholder="Veterinarian Name" />
     </div>
 
     <button type="submit">Add Dog</button>
@@ -128,6 +144,8 @@
         <th>Vaccinated</th>
         <th>Cologne</th>
         <th>Special Grooming</th>
+        <th>Gender</th>
+        <th>Street Address</th>
         <th>City</th>
         <th>State</th>
         <th>Zip</th>
@@ -149,33 +167,35 @@
       projectId: "dog-records-656c0",
       storageBucket: "dog-records-656c0.appspot.com",
       messagingSenderId: "347010811100",
-      appId: "1:347010811100:web:e32d9e95f860b2d16fa019"
+      appId: "1:347010811100:web:e32d9e95f860b2d16fa019",
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const form = document.getElementById('dogForm');
-    const tableBody = document.getElementById('dogTableBody');
+    const form = document.getElementById("dogForm");
+    const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
     function addDogToTable(dog, id) {
-      const newRow = document.createElement('tr');
-      newRow.setAttribute('data-id', id);
+      const newRow = document.createElement("tr");
+      newRow.setAttribute("data-id", id);
       newRow.innerHTML = `
         <td contenteditable="false">${dog.name}</td>
         <td contenteditable="false">${dog.owner}</td>
         <td contenteditable="false">${dog.breed}</td>
-        <td contenteditable="false">${dog.description || ''}</td>
-        <td contenteditable="false">${dog.vaccinated ? 'Yes' : 'No'}</td>
-        <td contenteditable="false">${dog.cologne ? 'Yes' : 'No'}</td>
-        <td contenteditable="false">${dog.specialGrooming || ''}</td>
-        <td contenteditable="false">${dog.city || ''}</td>
-        <td contenteditable="false">${dog.state || ''}</td>
-        <td contenteditable="false">${dog.zip || ''}</td>
-        <td contenteditable="false">${dog.veterinarian || ''}</td>
-        <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ''}</div></td>
-        <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ''}</div></td>
+        <td contenteditable="false">${dog.description || ""}</td>
+        <td contenteditable="false">${dog.vaccinated ? "Yes" : "No"}</td>
+        <td contenteditable="false">${dog.cologne ? "Yes" : "No"}</td>
+        <td contenteditable="false">${dog.specialGrooming || ""}</td>
+        <td contenteditable="false">${dog.gender || ""}</td>
+        <td contenteditable="false">${dog.streetAddress || ""}</td>
+        <td contenteditable="false">${dog.city || ""}</td>
+        <td contenteditable="false">${dog.state || ""}</td>
+        <td contenteditable="false">${dog.zip || ""}</td>
+        <td contenteditable="false">${dog.veterinarian || ""}</td>
+        <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ""}</div></td>
+        <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ""}</div></td>
         <td class="action-buttons">
           <button onclick="editDog(this)">Edit</button>
           <button onclick="saveDog(this, '${id}')" style="display:none">Save</button>
@@ -186,41 +206,201 @@
       tableBody.appendChild(newRow);
     }
 
-    form.addEventListener('submit', function(event) {
+    form.addEventListener("submit", function (event) {
       event.preventDefault();
-      const name = document.getElementById('dogName').value.trim();
-      const owner = document.getElementById('ownerName').value.trim();
-      const breed = document.getElementById('breed').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const vaccinated = document.getElementById('vaccinated').checked;
-      const cologne = document.getElementById('cologne').checked;
-      const specialGrooming = document.getElementById('specialGrooming').value.trim();
-      const city = document.getElementById('city').value.trim();
-      const state = document.getElementById('state').value.trim();
-      const zip = document.getElementById('zip').value.trim();
-      const veterinarian = document.getElementById('veterinarian').value.trim();
+      const name = document.getElementById("dogName").value.trim();
+      const owner = document.getElementById("ownerName").value.trim();
+      const breed = document.getElementById("breed").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const vaccinated = document.getElementById("vaccinated").checked;
+      const cologne = document.getElementById("cologne").checked;
+      const specialGrooming = document.getElementById("specialGrooming").value.trim();
 
-      const noisy = document.getElementById('noisy').checked;
-      const bites = document.getElementById('bites').checked;
-      const skinAllergy = document.getElementById('skinAllergy').checked;
-      const arthritic = document.getElementById('arthritic').checked;
-      const shy = document.getElementById('shy').checked;
-      const epileptic = document.getElementById('epileptic').checked;
-      const otherHealth = document.getElementById('otherHealth').value.trim();
+      const gender = document.querySelector('input[name="gender"]:checked')?.value;
 
-      if (!name || !owner || !breed) {
-        alert('Please fill out all fields.');
+      const streetAddress = document.getElementById("streetAddress").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const state = document.getElementById("state").value.trim();
+      const zip = document.getElementById("zip").value.trim();
+      const veterinarian = document.getElementById("veterinarian").value.trim();
+
+      const noisy = document.getElementById("noisy").checked;
+      const bites = document.getElementById("bites").checked;
+      const skinAllergy = document.getElementById("skinAllergy").checked;
+      const arthritic = document.getElementById("arthritic").checked;
+      const shy = document.getElementById("shy").checked;
+      const epileptic = document.getElementById("epileptic").checked;
+      const otherHealth = document.getElementById("otherHealth").value.trim();
+
+      if (!name || !owner || !breed || !streetAddress || !gender) {
+        alert("Please fill out all required fields.");
         return;
       }
 
-      const newDogRef = db.ref('dogs').push();
+      const newDogRef = db.ref("dogs").push();
       newDogRef.set({
-        name, owner, breed, description, vaccinated, cologne,
-        specialGrooming, city, state, zip, veterinarian,
-        noisy, bites, skinAllergy, arthritic, shy, epileptic, otherHealth
+        name,
+        owner,
+        breed,
+        description,
+        vaccinated,
+        cologne,
+        specialGrooming,
+        gender,
+        streetAddress,
+        city,
+        state,
+        zip,
+        veterinarian,
+        noisy,
+        bites,
+        skinAllergy,
+        arthritic,
+        shy,
+        epileptic,
+        otherHealth,
       });
       form.reset();
     });
+
+    function editDog(button) {
+      const row = button.closest("tr");
+      row.querySelectorAll("td").forEach((td, i) => {
+        if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
+
+        if (i === 7) {
+          // Gender column
+          const genderText = td.textContent.trim();
+          td.innerHTML = `
+            <label><input type="radio" name="genderEdit${row.dataset.id}" value="Male" ${genderText === "Male" ? "checked" : ""}> Male</label>
+            <label><input type="radio" name="genderEdit${row.dataset.id}" value="Female" ${genderText === "Female" ? "checked" : ""}> Female</label>
+          `;
+        } else {
+          td.contentEditable = "true";
+        }
+      });
+
+      button.style.display = "none";
+      const saveBtn = row.querySelector('button[onclick^="saveDog"]');
+      if (saveBtn) saveBtn.style.display = "inline-block";
+    }
+
+    function saveDog(button, id) {
+      const row = button.closest("tr");
+      const tds = row.querySelectorAll("td");
+      const data = {};
+
+      data.name = tds[0].textContent.trim();
+      data.owner = tds[1].textContent.trim();
+      data.breed = tds[2].textContent.trim();
+      data.description = tds[3].textContent.trim();
+
+      data.vaccinated = tds[4].textContent.trim().toLowerCase() === "yes";
+      data.cologne = tds[5].textContent.trim().toLowerCase() === "yes";
+
+      data.specialGrooming = tds[6].textContent.trim();
+
+      const genderRadios = tds[7].querySelectorAll(`input[name="genderEdit${id}"]`);
+      data.gender = "";
+      genderRadios.forEach((radio) => {
+        if (radio.checked) data.gender = radio.value;
+      });
+
+      data.streetAddress = tds[8].textContent.trim();
+      data.city = tds[9].textContent.trim();
+      data.state = tds[10].textContent.trim();
+      data.zip = tds[11].textContent.trim();
+      data.veterinarian = tds[12].textContent.trim();
+
+      db.ref("dogs/" + id)
+        .update(data)
+        .then(() => {
+          tds[0].textContent = data.name;
+          tds[1].textContent = data.owner;
+          tds[2].textContent = data.breed;
+          tds[3].textContent = data.description;
+          tds[4].textContent = data.vaccinated ? "Yes" : "No";
+          tds[5].textContent = data.cologne ? "Yes" : "No";
+          tds[6].textContent = data.specialGrooming;
+          tds[7].textContent = data.gender;
+          tds[8].textContent = data.streetAddress;
+          tds[9].textContent = data.city;
+          tds[10].textContent = data.state;
+          tds[11].textContent = data.zip;
+          tds[12].textContent = data.veterinarian;
+
+          tds.forEach((td, i) => {
+            if (td.classList.contains("action-buttons") || td.querySelector(".timestamp")) return;
+            td.contentEditable = "false";
+          });
+
+          button.style.display = "none";
+          const editBtn = row.querySelector('button[onclick^="editDog"]');
+          if (editBtn) editBtn.style.display = "inline-block";
+        })
+        .catch((err) => {
+          alert("Error saving data: " + err.message);
+        });
+    }
+
+    function deleteDog(id) {
+      if (!confirm("Are you sure you want to delete this dog record?")) return;
+      db.ref("dogs/" + id)
+        .remove()
+        .then(() => {
+          const row = document.querySelector(`tr[data-id="${id}"]`);
+          if (row) row.remove();
+        })
+        .catch((err) => {
+          alert("Error deleting record: " + err.message);
+        });
+    }
+
+    function checkIn(id) {
+      const now = new Date().toLocaleString();
+      db.ref("dogs/" + id).update({ checkIn: now });
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        const checkInCell = row.children[13];
+        checkInCell.querySelector(".timestamp").textContent = now;
+      }
+    }
+
+    function checkOut(id) {
+      const now = new Date().toLocaleString();
+      db.ref("dogs/" + id).update({ checkOut: now });
+      const row = document.querySelector(`tr[data-id="${id}"]`);
+      if (row) {
+        const checkOutCell = row.children[14];
+        checkOutCell.querySelector(".timestamp").textContent = now;
+      }
+    }
+
+    // Load existing dogs from Firebase and populate table
+    db.ref("dogs").on("value", (snapshot) => {
+      tableBody.innerHTML = "";
+      allRows = [];
+      const dogs = snapshot.val();
+      if (dogs) {
+        Object.entries(dogs).forEach(([id, dog]) => {
+          addDogToTable(dog, id);
+        });
+      }
+    });
+
+    // Example filterTableByOwner function (can be improved)
+    function filterTableByOwner() {
+      const filter = document.getElementById("searchOwner").value.toLowerCase();
+      allRows.forEach((row) => {
+        const ownerName = row.children[1].textContent.toLowerCase();
+        row.style.display = ownerName.includes(filter) ? "" : "none";
+      });
+    }
+
+    // Stub for printReport (implement as needed)
+    function printReport() {
+      alert("Print report functionality not yet implemented.");
+    }
   </script>
 </body>
 </html>
