@@ -1,1 +1,195 @@
-w
+/* Reset & Body Setup */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+/* Header */
+h1 {
+  text-align: center;
+  color: #2e7d32;
+  margin-bottom: 30px;
+}
+
+/* Form Styling */
+form {
+  max-width: 600px;
+  margin: 0 auto 40px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+form input[type="text"],
+form textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* Gender Radio Buttons */
+.gender-radio {
+  margin: 12px 0;
+}
+.gender-radio label {
+  margin-right: 20px;
+  font-weight: 500;
+}
+
+/* Phone Number Section */
+.phone-numbers-container {
+  margin-top: 16px;
+}
+.phone-number-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.phone-number-row input {
+  flex: 1;
+}
+.phone-number-row button {
+  background-color: #e57373;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.phone-number-row button:hover {
+  background-color: #d32f2f;
+}
+
+/* Add Phone Number Button */
+form button[type="button"] {
+  background-color: #64b5f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  margin-top: 8px;
+  cursor: pointer;
+}
+form button[type="button"]:hover {
+  background-color: #1976d2;
+}
+
+/* Health Checklist */
+.health-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.health-checklist label {
+  width: 45%;
+}
+
+/* Submit Button */
+form button[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+form button[type="submit"]:hover {
+  background-color: #388e3c;
+}
+
+/* Search & Print Section */
+#searchInput,
+#ownerFilter {
+  width: 100%;
+  max-width: 600px;
+  padding: 10px;
+  margin: 10px auto;
+  display: block;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+.print-btn {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  display: block;
+  margin: 10px auto 30px auto;
+}
+.print-btn:hover {
+  background-color: #f57c00;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+th, td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  background-color: #4caf50;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+.action-buttons button {
+  background-color: #607d8b;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.action-buttons button:hover {
+  background-color: #455a64;
+}
+
+/* Timestamps */
+.timestamp {
+  font-size: 0.8em;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .phone-number-row {
+    flex-direction: column;
+  }
+  .health-checklist label {
+    width: 100%;
+  }
+}
+
