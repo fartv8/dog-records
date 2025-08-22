@@ -5,171 +5,148 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dog Records</title>
   <style>
+    :root {
+      --bg:#f5f5f5; --text:#333; --muted:#666; --line:#ddd; --brand:#4caf50;
+      --card:#fff; --shadow:0 2px 4px rgba(0,0,0,.1);
+    }
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      margin: 0;
-      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0; padding: 20px;
     }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    form {
-      max-width: 500px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    form input[type="text"], form textarea, form input[type="datetime-local"], form input[type="date"], button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    .health-checklist {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .health-checklist label { width: 45%; }
-    .vet-info { margin-top: 15px; }
+    h1 { text-align: center; margin: 0 0 10px; }
+    .sub { text-align:center; color:var(--muted); margin-bottom:16px; }
 
+    /* FORM */
+    form {
+      max-width: 900px; margin: 16px auto; padding: 16px;
+      background: var(--card); border-radius: 8px; box-shadow: var(--shadow);
+      display: grid; gap: 10px; grid-template-columns: repeat(3, 1fr);
+    }
+    form input[type="text"], form input[type="date"], form input[type="datetime-local"], form textarea, form select {
+      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px;
+    }
+    form textarea { grid-column: span 3; min-height: 70px; }
+    .check-row { display:flex; gap:16px; align-items:center; grid-column: span 3; flex-wrap:wrap;}
+    .check-row label { display:flex; align-items:center; gap:6px; }
+    .row-span-3 { grid-column: span 3; }
+    .row-span-2 { grid-column: span 2; }
+    .btn-primary {
+      background: var(--brand); color:#fff; border:none; border-radius:6px; padding:10px 14px; cursor:pointer;
+    }
+    .btn {
+      padding: 6px 10px; border: 1px solid #ccc; background:#fff; border-radius: 6px; cursor: pointer;
+    }
+    .btn-outline { background:#fff; color:#333; border:1px solid #ccc; }
+    .btn-small { padding:6px 10px; border:none; border-radius:4px; cursor:pointer; background:var(--brand); color:#fff; }
+    .btn-small.btn-outline { background:#fff; color:#333; border:1px solid #ccc; }
+
+    /* SEARCH + PRINT UI */
+    .search-bar {
+      max-width: 900px; margin: 0 auto 8px; display:flex; gap:10px;
+    }
+    .search-bar input {
+      flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px;
+    }
+    .report-bar {
+      max-width:900px; margin: 8px auto 16px; display:flex; gap:10px; align-items:center;
+      background:var(--card); padding:10px; border-radius:8px; box-shadow: var(--shadow);
+    }
+    .report-bar label { min-width: 190px; font-weight:600; color:var(--text); }
+    .print-btn { padding: 10px 16px; border-radius:6px; border:none; background:var(--brand); color:#fff; cursor:pointer; }
+
+    /* APPOINTMENTS PANEL */
     .schedule {
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 16px;
+      max-width: 900px; margin: 16px auto; background: var(--card);
+      border-radius: 8px; box-shadow: var(--shadow); padding: 16px;
     }
-    .schedule h2 {
-      margin: 0 0 8px 0;
-      color: #333;
-      font-size: 20px;
-    }
+    .schedule h2 { margin: 0 0 8px; }
     .appt-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid #eee;
-      border-radius: 6px;
-      padding: 10px 12px;
-      margin: 8px 0;
+      display:flex; align-items:center; justify-content:space-between;
+      border:1px solid #eee; border-radius:8px; padding:10px 12px; margin:8px 0;
     }
     .appt-main {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 8px 16px;
-      width: 100%;
+      display:grid; grid-template-columns: 180px 1fr; gap: 8px 16px; width: 100%;
     }
-    .appt-main div span {
-      display: block;
-      font-size: 12px;
-      color: #666;
-    }
-    .appt-actions button {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-small {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background: #4CAF50;
-      color: #fff;
-    }
-    .btn-outline {
-      background: #fff;
-      color: #333;
-      border: 1px solid #ccc;
-    }
+    .appt-main div span { display:block; font-size:12px; color:var(--muted); }
 
+    /* TABLE */
     table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      width: 100%; border-collapse: collapse; margin-top: 16px; background: var(--card);
+      box-shadow: var(--shadow); max-width: 1200px; margin-left:auto; margin-right:auto;
     }
-    th, td {
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    th {
-      background-color: #4CAF50;
-      color: white;
-    }
-    tr:nth-child(even) { background-color: #f2f2f2; }
+    th, td { padding: 12px 15px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--brand); color: #fff; position: sticky; top: 0; }
+    tr:nth-child(even) { background-color: #f7f7f7; }
+    .action-buttons { display:flex; gap:6px; flex-wrap:wrap; }
+    .timestamp { font-size: .85em; color: var(--muted); margin-top: 4px; display:block; }
+    td[contenteditable="true"] { outline: 2px dashed #ffd54f; background: #fffbe6; }
 
-    .action-buttons {
-      display: flex;
-      gap: 5px;
-      margin-top: 5px;
-    }
-    .timestamp {
-      font-size: 0.8em;
-      color: #555;
-    }
-    .print-btn {
-      margin: 20px auto;
-      display: block;
-      padding: 10px 20px;
-      font-size: 16px;
+    @media (max-width: 900px) {
+      form { grid-template-columns: 1fr; }
+      .appt-main { grid-template-columns: 1fr; }
     }
   </style>
+
+  <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <h1>Dog Records</h1>
+  <div class="sub">Real-time check-ins, appointments, and printable owner reports</div>
 
-  <form id="dogForm">
+  <!-- FORM -->
+  <form id="dogForm" autocomplete="off">
     <input type="text" id="dogName" placeholder="Dog Name" required>
     <input type="text" id="ownerName" placeholder="Owner Name" required>
     <input type="text" id="breed" placeholder="Breed" required>
 
-    <!-- NEW: S/N and Birthday -->
-    <input type="text" id="sn" placeholder="S/N (Serial Number)">
+    <!-- NEW: S/N checkbox + Birthday -->
+    <label class="row-span-1" style="display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="sn"> S/N
+    </label>
     <input type="date" id="birthday" placeholder="Birthday">
+    <input type="datetime-local" id="appointment" placeholder="Appointment Date & Time">
 
-    <textarea id="description" placeholder="Grooming Supplies"></textarea>
-    <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
-    <label><input type="checkbox" id="cologne"> Cologne</label>
-    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)">
+    <textarea id="description" placeholder="Grooming Supplies (notes, tools, instructions)"></textarea>
+
+    <div class="check-row">
+      <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
+      <label><input type="checkbox" id="cologne"> Cologne</label>
+    </div>
+
+    <input type="text" id="specialGrooming" placeholder="Special/Bathing Instructions (optional)" class="row-span-3">
     <input type="text" id="city" placeholder="City">
     <input type="text" id="state" placeholder="State">
     <input type="text" id="zip" placeholder="Zip Code">
-    <div class="vet-info">
-      <input type="text" id="veterinarian" placeholder="Veterinarian Name">
-    </div>
-    <!-- Appointment Date/Time -->
-    <input type="datetime-local" id="appointment" placeholder="Appointment Date & Time">
+    <input type="text" id="veterinarian" placeholder="Veterinarian Name" class="row-span-3">
 
-    <button type="submit">Add Dog</button>
+    <button type="submit" class="btn-primary row-span-3">Add Dog</button>
   </form>
 
-  <!-- Upcoming Appointments -->
+  <!-- SEARCH -->
+  <div class="search-bar">
+    <input type="text" id="searchDog" placeholder="Search by dog name" oninput="filterTable()">
+    <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTable()">
+  </div>
+
+  <!-- PRINT REPORT -->
+  <div class="report-bar">
+    <label for="ownerFilter">Enter Owner Name to Print Report:</label>
+    <input type="text" id="ownerFilter" placeholder="Owner Name">
+    <button class="print-btn" onclick="printReport()">Print Owner Report</button>
+  </div>
+
+  <!-- APPOINTMENTS -->
   <div class="schedule">
     <h2>Upcoming Appointments</h2>
     <div id="appointmentsList"></div>
   </div>
 
-  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
-  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
-
-  <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTableByOwner()" />
-
+  <!-- TABLE -->
   <table>
     <thead>
       <tr>
@@ -196,78 +173,84 @@
   </table>
 
   <script>
+    // ---------- Firebase ----------
     const firebaseConfig = {
       apiKey: "AIzaSyBLFMBvc4HF9atMxzY7Rf1u-oBJBAYZvTo",
       authDomain: "dog-records-656c0.firebaseapp.com",
-      databaseURL: "https://dog-records-656c0-default-rtdb.firebaseio.com", // ✅ added
+      databaseURL: "https://dog-records-656c0-default-rtdb.firebaseio.com",
       projectId: "dog-records-656c0",
       storageBucket: "dog-records-656c0.appspot.com",
       messagingSenderId: "347010811100",
       appId: "1:347010811100:web:e32d9e95f860b2d16fa019"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // ---------- DOM ----------
     const form = document.getElementById('dogForm');
     const tableBody = document.getElementById('dogTableBody');
     const appointmentsList = document.getElementById('appointmentsList');
-    let allRows = [];
+    const ownerFilterInput = document.getElementById('ownerFilter');
+    const searchDogInput = document.getElementById('searchDog');
+    const searchOwnerInput = document.getElementById('searchOwner');
 
+    let allRows = []; // cache for client-side filtering
+
+    // ---------- Row Renderer ----------
     function addDogToTable(dog, id) {
-      const newRow = document.createElement('tr');
-      newRow.setAttribute('data-id', id);
-      newRow.innerHTML = `
-        <td contenteditable="false">${dog.name || ''}</td>
-        <td contenteditable="false">${dog.owner || ''}</td>
-        <td contenteditable="false">${dog.breed || ''}</td>
-        <td contenteditable="false">${dog.sn || ''}</td>
-        <td contenteditable="false">${dog.birthday || ''}</td>
-        <td contenteditable="false">${dog.description || ''}</td>
+      const row = document.createElement('tr');
+      row.setAttribute('data-id', id);
+
+      row.innerHTML = `
+        <td contenteditable="false">${escapeHtml(dog.name || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.owner || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.breed || '')}</td>
+        <td contenteditable="false">${dog.sn ? 'Yes' : 'No'}</td>
+        <td contenteditable="false">${escapeHtml(dog.birthday || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.description || '')}</td>
         <td contenteditable="false">${dog.vaccinated ? 'Yes' : 'No'}</td>
         <td contenteditable="false">${dog.cologne ? 'Yes' : 'No'}</td>
-        <td contenteditable="false">${dog.specialGrooming || ''}</td>
-        <td contenteditable="false">${dog.city || ''}</td>
-        <td contenteditable="false">${dog.state || ''}</td>
-        <td contenteditable="false">${dog.zip || ''}</td>
-        <td contenteditable="false">${dog.veterinarian || ''}</td>
-        <td contenteditable="false">${dog.appointment || ''}</td>
+        <td contenteditable="false">${escapeHtml(dog.specialGrooming || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.city || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.state || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.zip || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.veterinarian || '')}</td>
+        <td contenteditable="false">${escapeHtml(dog.appointment || '')}</td>
+
         <td>
           <button class="btn-small" onclick="checkIn('${id}')">Check In</button>
-          <div class="timestamp">${dog.checkIn || ''}</div>
+          <span class="timestamp">${escapeHtml(dog.checkIn || '')}</span>
         </td>
         <td>
           <button class="btn-small btn-outline" onclick="checkOut('${id}')">Check Out</button>
-          <div class="timestamp">${dog.checkOut || ''}</div>
+          <span class="timestamp">${escapeHtml(dog.checkOut || '')}</span>
         </td>
         <td class="action-buttons">
-          <button onclick="editDog(this)">Edit</button>
-          <button onclick="saveDog(this, '${id}')" style="display:none">Save</button>
-          <button onclick="deleteDog('${id}')">Delete</button>
+          <button class="btn" onclick="editDog(this)">Edit</button>
+          <button class="btn btn-outline" onclick="saveDog(this, '${id}')" style="display:none">Save</button>
+          <button class="btn" onclick="deleteDog('${id}')">Delete</button>
         </td>
       `;
-      allRows.push(newRow);
-      tableBody.appendChild(newRow);
+
+      allRows.push(row);
+      tableBody.appendChild(row);
     }
 
+    // ---------- Appointments Panel ----------
     function renderAppointments(dogsObj) {
       const items = [];
       for (const [id, dog] of Object.entries(dogsObj || {})) {
         if (!dog.appointment) continue;
         const ts = new Date(dog.appointment).getTime();
         if (isNaN(ts)) continue;
-        items.push({
-          id,
-          dog: dog.name || '',
-          owner: dog.owner || '',
-          breed: dog.breed || '',
-          when: dog.appointment,
-          ts
+        items.push({ id, ts,
+          dog: dog.name || '', owner: dog.owner || '', breed: dog.breed || '',
+          when: dog.appointment
         });
       }
       items.sort((a,b) => a.ts - b.ts);
 
-      if (items.length === 0) {
+      if (!items.length) {
         appointmentsList.innerHTML = `<div style="color:#666">No upcoming appointments.</div>`;
         return;
       }
@@ -280,41 +263,35 @@
               <span>Appointment</span>
             </div>
             <div>
-              <strong>${x.dog}</strong> (${x.breed}) • Owner: <strong>${x.owner}</strong>
-              <span>Dog ID: ${x.id}</span>
+              <strong>${escapeHtml(x.dog)}</strong> (${escapeHtml(x.breed)}) • Owner: <strong>${escapeHtml(x.owner)}</strong>
+              <span>Dog ID: ${escapeHtml(x.id)}</span>
             </div>
           </div>
-          <div class="appt-actions">
+          <div>
             <button class="btn-small" onclick="checkIn('${x.id}')">Mark Arrived</button>
           </div>
         </div>
       `).join('');
     }
 
-    function filterTableByOwner() {
-      const filter = document.getElementById('searchOwner').value.trim().toLowerCase();
-      tableBody.innerHTML = '';
-      allRows.forEach(row => {
-        const owner = row.children[1].textContent.trim().toLowerCase();
-        if (!filter || owner.includes(filter)) tableBody.appendChild(row);
-      });
-    }
-
-    function editDog(button) {
-      const row = button.closest('tr');
+    // ---------- Editing ----------
+    window.editDog = function(btn) {
+      const row = btn.closest('tr');
       row.querySelectorAll('td[contenteditable]').forEach(td => td.contentEditable = true);
-      button.style.display = 'none';
+      btn.style.display = 'none';
       row.querySelector('button[onclick^="saveDog"]').style.display = 'inline-block';
-    }
+    };
 
-    function saveDog(button, id) {
-      const row = button.closest('tr');
+    window.saveDog = function(btn, id) {
+      const row = btn.closest('tr');
       const cells = row.querySelectorAll('td');
+
+      // Map cells by column index (keep in sync with <thead>)
       const updatedDog = {
         name: cells[0].textContent.trim(),
         owner: cells[1].textContent.trim(),
         breed: cells[2].textContent.trim(),
-        sn: cells[3].textContent.trim(),
+        sn: cells[3].textContent.trim().toLowerCase() === 'yes',
         birthday: cells[4].textContent.trim(),
         description: cells[5].textContent.trim(),
         vaccinated: cells[6].textContent.trim().toLowerCase() === 'yes',
@@ -328,46 +305,55 @@
         checkIn: row.querySelectorAll('.timestamp')[0]?.textContent || '',
         checkOut: row.querySelectorAll('.timestamp')[1]?.textContent || ''
       };
+
       db.ref('dogs/' + id).set(updatedDog);
+
       row.querySelectorAll('td[contenteditable]').forEach(td => td.contentEditable = false);
-      button.style.display = 'none';
+      btn.style.display = 'none';
       row.querySelector('button[onclick^="editDog"]').style.display = 'inline-block';
-    }
+    };
 
-    function deleteDog(id) {
-      if (confirm('Are you sure you want to delete this dog?')) {
-        db.ref('dogs/' + id).remove();
-      }
-    }
+    window.deleteDog = function(id) {
+      if (!confirm('Delete this record?')) return;
+      db.ref('dogs/' + id).remove();
+    };
 
+    // ---------- Check In/Out ----------
     window.checkIn = function(id) {
       const time = new Date().toLocaleString();
       db.ref('dogs/' + id + '/checkIn').set(time);
-    }
-
+    };
     window.checkOut = function(id) {
       const time = new Date().toLocaleString();
       db.ref('dogs/' + id + '/checkOut').set(time);
-    }
+    };
 
-    function printReport() {
-      const filterName = document.getElementById('ownerFilter').value.trim().toLowerCase();
-      if (!filterName) {
-        alert('Please enter an owner name to print the report.');
-        return;
-      }
-      const dogs = Array.from(tableBody.querySelectorAll('tr')).filter(row => {
-        const owner = row.children[1].textContent.trim().toLowerCase();
-        return owner === filterName;
+    // ---------- Search / Filter ----------
+    window.filterTable = function() {
+      const dogFilter = (searchDogInput.value || '').toLowerCase();
+      const ownerFilter = (searchOwnerInput.value || '').toLowerCase();
+      tableBody.innerHTML = '';
+      allRows.forEach((row) => {
+        const dogName = row.children[0].textContent.toLowerCase();
+        const ownerName = row.children[1].textContent.toLowerCase();
+        if (dogName.includes(dogFilter) && ownerName.includes(ownerFilter)) {
+          tableBody.appendChild(row);
+        }
       });
-      if (dogs.length === 0) {
-        alert('No records found for owner: ' + filterName);
-        return;
-      }
+    };
+
+    // ---------- Print Owner Report ----------
+    window.printReport = function() {
+      const filterName = (ownerFilterInput.value || '').trim().toLowerCase();
+      if (!filterName) return alert('Please enter an owner name to print the report.');
+
+      const rows = allRows.filter(r => r.children[1].textContent.trim().toLowerCase() === filterName);
+      if (!rows.length) return alert('No records found for owner: ' + filterName);
+
       let reportHTML = `
         <html>
         <head>
-          <title>Owner Report - ${filterName}</title>
+          <title>Owner Report - ${escapeHtml(filterName)}</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
             h2 { text-align: center; margin-bottom: 20px; color: #333; text-transform: capitalize; }
@@ -378,7 +364,7 @@
           </style>
         </head>
         <body>
-          <h2>Dog Records for Owner: ${filterName}</h2>
+          <h2>Dog Records for Owner: ${escapeHtml(filterName)}</h2>
           <table>
             <thead>
               <tr>
@@ -402,42 +388,46 @@
             </thead>
             <tbody>
       `;
-      dogs.forEach(row => {
-        const cells = row.querySelectorAll('td');
+
+      rows.forEach(row => {
+        const c = row.querySelectorAll('td');
         reportHTML += `
           <tr>
-            <td>${cells[0].textContent}</td>
-            <td>${cells[1].textContent}</td>
-            <td>${cells[2].textContent}</td>
-            <td>${cells[3].textContent}</td>
-            <td>${cells[4].textContent}</td>
-            <td>${cells[5].textContent}</td>
-            <td>${cells[6].textContent}</td>
-            <td>${cells[7].textContent}</td>
-            <td>${cells[8].textContent}</td>
-            <td>${cells[9].textContent}</td>
-            <td>${cells[10].textContent}</td>
-            <td>${cells[11].textContent}</td>
-            <td>${cells[12].textContent}</td>
-            <td>${cells[13].textContent}</td>
-            <td>${cells[14].querySelector('.timestamp')?.textContent || ''}</td>
-            <td>${cells[15].querySelector('.timestamp')?.textContent || ''}</td>
+            <td>${escapeHtml(c[0].textContent)}</td>
+            <td>${escapeHtml(c[1].textContent)}</td>
+            <td>${escapeHtml(c[2].textContent)}</td>
+            <td>${escapeHtml(c[3].textContent)}</td>
+            <td>${escapeHtml(c[4].textContent)}</td>
+            <td>${escapeHtml(c[5].textContent)}</td>
+            <td>${escapeHtml(c[6].textContent)}</td>
+            <td>${escapeHtml(c[7].textContent)}</td>
+            <td>${escapeHtml(c[8].textContent)}</td>
+            <td>${escapeHtml(c[9].textContent)}</td>
+            <td>${escapeHtml(c[10].textContent)}</td>
+            <td>${escapeHtml(c[11].textContent)}</td>
+            <td>${escapeHtml(c[12].textContent)}</td>
+            <td>${escapeHtml(c[13].textContent)}</td>
+            <td>${escapeHtml(c[14].querySelector('.timestamp')?.textContent || '')}</td>
+            <td>${escapeHtml(c[15].querySelector('.timestamp')?.textContent || '')}</td>
           </tr>
         `;
       });
+
       reportHTML += `
             </tbody>
           </table>
         </body>
         </html>
       `;
-      const win = window.open('', '_blank', 'width=1000,height=700');
+
+      const win = window.open('', '_blank', 'width=1100,height=800');
       win.document.write(reportHTML);
       win.document.close();
       win.focus();
       win.print();
-    }
+    };
 
+    // ---------- Load / Sync ----------
     function loadDogs() {
       db.ref('dogs').on('value', (snapshot) => {
         tableBody.innerHTML = '';
@@ -445,41 +435,54 @@
         const dogs = snapshot.val() || {};
         Object.entries(dogs).forEach(([id, dog]) => addDogToTable(dog, id));
         renderAppointments(dogs);
+        filterTable(); // keep current search filters applied
       });
     }
 
+    // ---------- Add ----------
     form.addEventListener('submit', function(event) {
       event.preventDefault();
-      const name = document.getElementById('dogName').value.trim();
-      const owner = document.getElementById('ownerName').value.trim();
-      const breed = document.getElementById('breed').value.trim();
-      const sn = document.getElementById('sn').value.trim();
-      const birthday = document.getElementById('birthday').value.trim();
-      const description = document.getElementById('description').value.trim();
+
+      const name = (document.getElementById('dogName').value || '').trim();
+      const owner = (document.getElementById('ownerName').value || '').trim();
+      const breed = (document.getElementById('breed').value || '').trim();
+
+      const sn = document.getElementById('sn').checked;
+      const birthday = (document.getElementById('birthday').value || '').trim();
+      const appointment = (document.getElementById('appointment').value || '').trim();
+
+      const description = (document.getElementById('description').value || '').trim();
       const vaccinated = document.getElementById('vaccinated').checked;
       const cologne = document.getElementById('cologne').checked;
-      const specialGrooming = document.getElementById('specialGrooming').value.trim();
-      const city = document.getElementById('city').value.trim();
-      const state = document.getElementById('state').value.trim();
-      const zip = document.getElementById('zip').value.trim();
-      const veterinarian = document.getElementById('veterinarian').value.trim();
-      const appointment = document.getElementById('appointment').value.trim();
+      const specialGrooming = (document.getElementById('specialGrooming').value || '').trim();
+      const city = (document.getElementById('city').value || '').trim();
+      const state = (document.getElementById('state').value || '').trim();
+      const zip = (document.getElementById('zip').value || '').trim();
+      const veterinarian = (document.getElementById('veterinarian').value || '').trim();
 
       if (!name || !owner || !breed) {
-        alert('Please fill out all required fields.');
+        alert('Please fill out Dog Name, Owner Name, and Breed.');
         return;
       }
 
-      const newDogRef = db.ref('dogs').push();
-      newDogRef.set({
-        name, owner, breed, sn, birthday,
-        description, vaccinated, cologne,
-        specialGrooming, city, state, zip, veterinarian, appointment
-      });
-
-      form.reset();
+      const ref = db.ref('dogs').push();
+      ref.set({
+        name, owner, breed, sn, birthday, description, vaccinated, cologne,
+        specialGrooming, city, state, zip, veterinarian, appointment,
+        checkIn: '', checkOut: ''
+      }).then(() => form.reset())
+        .catch(err => alert('Could not save to Firebase: ' + err.message));
     });
 
+    // ---------- Utilities ----------
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Start realtime sync
     loadDogs();
   </script>
 </body>
