@@ -1,0 +1,16 @@
+{
+  "name": "dog-records-functions",
+  "engines": {
+    "node": "18"
+  },
+  "main": "index.js",
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^11.11.1",
+    "firebase-functions": "^4.6.0",
+    "twilio": "^4.23.0"
+  }
+}
