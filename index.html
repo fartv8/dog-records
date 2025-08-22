@@ -61,6 +61,11 @@
       font-size: 0.8em;
       color: #555;
     }
+    .print-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
     .search-container {
       max-width: 500px;
       margin: 0 auto 10px auto;
@@ -80,7 +85,7 @@
 <body>
   <h1>Dog Records</h1>
 
-  <!-- Dog entry form -->
+  <!-- Add Dog Form -->
   <form id="dogForm">
     <input type="text" id="dogName" placeholder="Dog Name" required />
     <input type="text" id="ownerName" placeholder="Owner Name" required />
@@ -95,22 +100,23 @@
     <button type="submit">Add Dog</button>
   </form>
 
-  <!-- Search fields -->
+  <!-- Search -->
   <div class="search-container">
     <input type="text" id="searchDog" placeholder="Search by dog name" oninput="filterTable()" />
     <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTable()" />
   </div>
 
-  <!-- Owner report -->
+  <!-- Owner Report -->
   <div style="max-width: 500px; margin: 20px auto; display: flex; gap: 10px; align-items: center;">
     <label for="ownerFilter" style="font-weight: bold; color: #333; min-width: 180px;">
       Enter Owner Name to Print Report:
     </label>
-    <input type="text" id="ownerFilter" placeholder="Owner Name" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
-    <button onclick="printReport()" style="flex-shrink: 0; padding: 10px 20px;">Print Owner Report</button>
+    <input type="text" id="ownerFilter" placeholder="Owner Name"
+           style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+    <button class="print-btn" onclick="printReport()">Print Owner Report</button>
   </div>
 
-  <!-- Dog table -->
+  <!-- Dog Records Table -->
   <table>
     <thead>
       <tr>
@@ -122,7 +128,7 @@
         <th>Cologne</th>
         <th>Bathing Instructions</th>
         <th>Price ($)</th>
-        <th>Phone Number(s)</th>
+        <th>Phone</th>
         <th>Address</th>
         <th>Check In</th>
         <th>Check Out</th>
@@ -133,11 +139,11 @@
   </table>
 
   <script>
-    // Firebase setup
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBLFMBvc4HF9atMxzY7Rf1u-oBJBAYZvTo",
       authDomain: "dog-records-656c0.firebaseapp.com",
-      databaseURL: "https://dog-records-656c0-default-rtdb.firebaseio.com/",
+      databaseURL: "https://dog-records-656c0-default-rtdb.firebaseio.com",
       projectId: "dog-records-656c0",
       storageBucket: "dog-records-656c0.appspot.com",
       messagingSenderId: "347010811100",
@@ -150,30 +156,11 @@
     const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
-    // Add new dog
-    form.addEventListener("submit", function (event) {
-      event.preventDefault();
-      const name = document.getElementById("dogName").value.trim();
-      const owner = document.getElementById("ownerName").value.trim();
-      const breed = document.getElementById("breed").value.trim();
-      const description = document.getElementById("description").value.trim();
-      const vaccinated = document.getElementById("vaccinated").checked;
-      const cologne = document.getElementById("cologne").checked;
-      const specialGrooming = document.getElementById("specialGrooming").value.trim();
-      const price = document.getElementById("price").value.trim();
-      const phoneNumbers = document.getElementById("phoneNumbers").value.trim();
-      const address = document.getElementById("address").value.trim();
-
-      const newDogRef = db.ref("dogs").push();
-      newDogRef.set({ name, owner, breed, description, vaccinated, cologne, specialGrooming, price, phoneNumbers, address, checkIn:"", checkOut:"" });
-      form.reset();
-    });
-
-    // Add row
+    // Add dog to table
     function addDogToTable(dog, id) {
-      const newRow = document.createElement("tr");
-      newRow.setAttribute("data-id", id);
-      newRow.innerHTML = `
+      const row = document.createElement("tr");
+      row.setAttribute("data-id", id);
+      row.innerHTML = `
         <td>${dog.name}</td>
         <td>${dog.owner}</td>
         <td>${dog.breed}</td>
@@ -186,45 +173,14 @@
         <td>${dog.address || ""}</td>
         <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ""}</div></td>
         <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ""}</div></td>
-        <td class="action-buttons"><button onclick="deleteDog('${id}')">Delete</button></td>
-      `;
-      allRows.push(newRow);
-      tableBody.appendChild(newRow);
+        <td class="action-buttons">
+          <button onclick="deleteDog('${id}')">Delete</button>
+        </td>`;
+      allRows.push(row);
+      tableBody.appendChild(row);
     }
 
-    // Load dogs
-    function loadDogs() {
-      db.ref("dogs").on("value", (snapshot) => {
-        tableBody.innerHTML = "";
-        allRows = [];
-        const dogs = snapshot.val();
-        if (dogs) {
-          Object.entries(dogs).forEach(([id, dog]) => {
-            addDogToTable(dog, id);
-          });
-        }
-      });
-    }
-    loadDogs();
-
-    // Delete dog
-    function deleteDog(id) {
-      if (confirm("Delete this record?")) {
-        db.ref("dogs/" + id).remove();
-      }
-    }
-
-    // Check in/out
-    function checkIn(id) {
-      const time = new Date().toLocaleString();
-      db.ref("dogs/" + id + "/checkIn").set(time);
-    }
-    function checkOut(id) {
-      const time = new Date().toLocaleString();
-      db.ref("dogs/" + id + "/checkOut").set(time);
-    }
-
-    // Search filter
+    // Filter
     function filterTable() {
       const dogFilter = document.getElementById("searchDog").value.toLowerCase();
       const ownerFilter = document.getElementById("searchOwner").value.toLowerCase();
@@ -238,30 +194,58 @@
       });
     }
 
-    // Print owner report
+    // CRUD
+    function deleteDog(id) {
+      db.ref("dogs/" + id).remove();
+    }
+    function checkIn(id) {
+      db.ref("dogs/" + id + "/checkIn").set(new Date().toLocaleString());
+    }
+    function checkOut(id) {
+      db.ref("dogs/" + id + "/checkOut").set(new Date().toLocaleString());
+    }
+
+    // Report
     function printReport() {
-      const filterName = document.getElementById("ownerFilter").value.trim().toLowerCase();
-      if (!filterName) return alert("Enter owner name first");
-      const dogs = Array.from(tableBody.querySelectorAll("tr")).filter(row => row.children[1].textContent.trim().toLowerCase() === filterName);
-      if (dogs.length === 0) return alert("No records found");
-      let reportHTML = `
-        <html><head><title>Report</title>
-        <style>
-        body { font-family: Arial; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th,td { border:1px solid #ddd; padding:8px; }
-        th { background:#4caf50; color:#fff; }
-        </style></head><body>
-        <h2>Dog Records for ${filterName}</h2>
-        <table><thead>${document.querySelector("thead").innerHTML}</thead><tbody>
-      `;
-      dogs.forEach(row => { reportHTML += "<tr>"+row.innerHTML+"</tr>"; });
-      reportHTML += "</tbody></table></body></html>";
-      const win = window.open("", "_blank");
-      win.document.write(reportHTML);
-      win.document.close();
+      const owner = document.getElementById("ownerFilter").value.toLowerCase();
+      const rows = allRows.filter(r => r.children[1].textContent.toLowerCase() === owner);
+      if (!rows.length) return alert("No records for that owner");
+      let html = `<html><head><title>Report</title></head><body><h2>Owner Report</h2><table border="1"><tr>`;
+      document.querySelectorAll("th").forEach(th => html += `<th>${th.textContent}</th>`);
+      html += "</tr>";
+      rows.forEach(r => html += `<tr>${r.innerHTML}</tr>`);
+      html += "</table></body></html>`;
+      const win = window.open();
+      win.document.write(html);
       win.print();
     }
+
+    // Form submit
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const dog = {
+        name: dogName.value,
+        owner: ownerName.value,
+        breed: breed.value,
+        description: description.value,
+        vaccinated: vaccinated.checked,
+        cologne: cologne.checked,
+        specialGrooming: specialGrooming.value,
+        price: price.value,
+        phoneNumbers: phoneNumbers.value,
+        address: address.value
+      };
+      db.ref("dogs").push(dog);
+      form.reset();
+    });
+
+    // Load
+    db.ref("dogs").on("value", snap => {
+      tableBody.innerHTML = "";
+      allRows = [];
+      const dogs = snap.val();
+      if (dogs) Object.entries(dogs).forEach(([id, dog]) => addDogToTable(dog, id));
+    });
   </script>
 </body>
 </html>
