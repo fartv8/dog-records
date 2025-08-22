@@ -1,13 +1,13 @@
 {
   "hosting": {
-    "public": "public",
+    "public": ".",   // <-- dot means "current directory" instead of /public
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ]
   },
-  "database": {
-    "rules": "rules.json"
+  "functions": {
+    "source": "functions"
   }
 }
