@@ -23,77 +23,16 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
-    form input[type="text"], form textarea, form input[type="datetime-local"], form input[type="date"], button {
+    form input[type="text"],
+    form textarea,
+    button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
       margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 4px;
-      box-sizing: border-box;
     }
-    .health-checklist {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .health-checklist label { width: 45%; }
-    .vet-info { margin-top: 15px; }
-
-    .schedule {
-      max-width: 900px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      padding: 16px;
-    }
-    .schedule h2 {
-      margin: 0 0 8px 0;
-      color: #333;
-      font-size: 20px;
-    }
-    .appt-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border: 1px solid #eee;
-      border-radius: 6px;
-      padding: 10px 12px;
-      margin: 8px 0;
-    }
-    .appt-main {
-      display: grid;
-      grid-template-columns: 140px 1fr;
-      gap: 8px 16px;
-      width: 100%;
-    }
-    .appt-main div span {
-      display: block;
-      font-size: 12px;
-      color: #666;
-    }
-    .appt-actions button {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .btn-small {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      background: #4CAF50;
-      color: #fff;
-    }
-    .btn-outline {
-      background: #fff;
-      color: #333;
-      border: 1px solid #ccc;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -107,11 +46,12 @@
       text-align: left;
     }
     th {
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
     }
-    tr:nth-child(even) { background-color: #f2f2f2; }
-
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
     .action-buttons {
       display: flex;
       gap: 5px;
@@ -121,11 +61,17 @@
       font-size: 0.8em;
       color: #555;
     }
-    .print-btn {
-      margin: 20px auto;
-      display: block;
-      padding: 10px 20px;
-      font-size: 16px;
+    .search-container {
+      max-width: 500px;
+      margin: 0 auto 10px auto;
+      display: flex;
+      gap: 10px;
+    }
+    .search-container input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
   </style>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -134,54 +80,50 @@
 <body>
   <h1>Dog Records</h1>
 
+  <!-- Dog entry form -->
   <form id="dogForm">
-    <input type="text" id="dogName" placeholder="Dog Name" required>
-    <input type="text" id="ownerName" placeholder="Owner Name" required>
-    <input type="text" id="breed" placeholder="Breed" required>
-    <textarea id="description" placeholder="Grooming Supplies"></textarea>
-    <label><input type="checkbox" id="vaccinated"> Vaccinated</label>
-    <label><input type="checkbox" id="cologne"> Cologne</label>
-    <input type="text" id="specialGrooming" placeholder="Special Grooming (optional)">
-    <input type="text" id="city" placeholder="City">
-    <input type="text" id="state" placeholder="State">
-    <input type="text" id="zip" placeholder="Zip Code">
-    <div class="vet-info">
-      <input type="text" id="veterinarian" placeholder="Veterinarian Name">
-    </div>
-    <!-- NEW: Appointment Date/Time -->
-    <input type="datetime-local" id="appointment" placeholder="Appointment Date & Time">
-
+    <input type="text" id="dogName" placeholder="Dog Name" required />
+    <input type="text" id="ownerName" placeholder="Owner Name" required />
+    <input type="text" id="breed" placeholder="Breed" required />
+    <textarea id="description" placeholder="Grooming Instructions"></textarea>
+    <label><input type="checkbox" id="vaccinated" /> Vaccinated</label>
+    <label><input type="checkbox" id="cologne" /> Cologne</label>
+    <input type="text" id="specialGrooming" placeholder="Bathing Instructions (optional)" />
+    <input type="text" id="price" placeholder="Price ($)" />
+    <input type="text" id="phoneNumbers" placeholder="Phone Number(s)" />
+    <input type="text" id="address" placeholder="Address" />
     <button type="submit">Add Dog</button>
   </form>
 
-  <!-- Upcoming Appointments -->
-  <div class="schedule">
-    <h2>Upcoming Appointments</h2>
-    <div id="appointmentsList">
-      <!-- Filled by JS -->
-    </div>
+  <!-- Search fields -->
+  <div class="search-container">
+    <input type="text" id="searchDog" placeholder="Search by dog name" oninput="filterTable()" />
+    <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTable()" />
   </div>
 
-  <input type="text" id="ownerFilter" placeholder="Enter owner name to print report" />
-  <button class="print-btn" onclick="printReport()">Print Owner Report</button>
+  <!-- Owner report -->
+  <div style="max-width: 500px; margin: 20px auto; display: flex; gap: 10px; align-items: center;">
+    <label for="ownerFilter" style="font-weight: bold; color: #333; min-width: 180px;">
+      Enter Owner Name to Print Report:
+    </label>
+    <input type="text" id="ownerFilter" placeholder="Owner Name" style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+    <button onclick="printReport()" style="flex-shrink: 0; padding: 10px 20px;">Print Owner Report</button>
+  </div>
 
-  <input type="text" id="searchOwner" placeholder="Search by owner name" oninput="filterTableByOwner()" />
-
+  <!-- Dog table -->
   <table>
     <thead>
       <tr>
         <th>Dog Name</th>
         <th>Owner Name</th>
         <th>Breed</th>
-        <th>Grooming Supplies</th>
+        <th>Grooming Instructions</th>
         <th>Vaccinated</th>
         <th>Cologne</th>
-        <th>Special Grooming</th>
-        <th>City</th>
-        <th>State</th>
-        <th>Zip</th>
-        <th>Veterinarian</th>
-        <th>Appointment</th>
+        <th>Bathing Instructions</th>
+        <th>Price ($)</th>
+        <th>Phone Number(s)</th>
+        <th>Address</th>
         <th>Check In</th>
         <th>Check Out</th>
         <th>Actions</th>
@@ -191,288 +133,135 @@
   </table>
 
   <script>
+    // Firebase setup
     const firebaseConfig = {
       apiKey: "AIzaSyBLFMBvc4HF9atMxzY7Rf1u-oBJBAYZvTo",
       authDomain: "dog-records-656c0.firebaseapp.com",
+      databaseURL: "https://dog-records-656c0-default-rtdb.firebaseio.com/",
       projectId: "dog-records-656c0",
       storageBucket: "dog-records-656c0.appspot.com",
       messagingSenderId: "347010811100",
-      appId: "1:347010811100:web:e32d9e95f860b2d16fa019"
+      appId: "1:347010811100:web:e32d9e95f860b2d16fa019",
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const form = document.getElementById('dogForm');
-    const tableBody = document.getElementById('dogTableBody');
-    const appointmentsList = document.getElementById('appointmentsList');
+    const form = document.getElementById("dogForm");
+    const tableBody = document.getElementById("dogTableBody");
     let allRows = [];
 
+    // Add new dog
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const name = document.getElementById("dogName").value.trim();
+      const owner = document.getElementById("ownerName").value.trim();
+      const breed = document.getElementById("breed").value.trim();
+      const description = document.getElementById("description").value.trim();
+      const vaccinated = document.getElementById("vaccinated").checked;
+      const cologne = document.getElementById("cologne").checked;
+      const specialGrooming = document.getElementById("specialGrooming").value.trim();
+      const price = document.getElementById("price").value.trim();
+      const phoneNumbers = document.getElementById("phoneNumbers").value.trim();
+      const address = document.getElementById("address").value.trim();
+
+      const newDogRef = db.ref("dogs").push();
+      newDogRef.set({ name, owner, breed, description, vaccinated, cologne, specialGrooming, price, phoneNumbers, address, checkIn:"", checkOut:"" });
+      form.reset();
+    });
+
+    // Add row
     function addDogToTable(dog, id) {
-      const newRow = document.createElement('tr');
-      newRow.setAttribute('data-id', id);
+      const newRow = document.createElement("tr");
+      newRow.setAttribute("data-id", id);
       newRow.innerHTML = `
-        <td contenteditable="false">${dog.name}</td>
-        <td contenteditable="false">${dog.owner}</td>
-        <td contenteditable="false">${dog.breed}</td>
-        <td contenteditable="false">${dog.description || ''}</td>
-        <td contenteditable="false">${dog.vaccinated ? 'Yes' : 'No'}</td>
-        <td contenteditable="false">${dog.cologne ? 'Yes' : 'No'}</td>
-        <td contenteditable="false">${dog.specialGrooming || ''}</td>
-        <td contenteditable="false">${dog.city || ''}</td>
-        <td contenteditable="false">${dog.state || ''}</td>
-        <td contenteditable="false">${dog.zip || ''}</td>
-        <td contenteditable="false">${dog.veterinarian || ''}</td>
-        <td contenteditable="false">${dog.appointment || ''}</td>
-        <td>
-          <button class="btn-small" onclick="checkIn('${id}')">Check In</button>
-          <div class="timestamp">${dog.checkIn || ''}</div>
-        </td>
-        <td>
-          <button class="btn-small btn-outline" onclick="checkOut('${id}')">Check Out</button>
-          <div class="timestamp">${dog.checkOut || ''}</div>
-        </td>
-        <td class="action-buttons">
-          <button onclick="editDog(this)">Edit</button>
-          <button onclick="saveDog(this, '${id}')" style="display:none">Save</button>
-          <button onclick="deleteDog('${id}')">Delete</button>
-        </td>
+        <td>${dog.name}</td>
+        <td>${dog.owner}</td>
+        <td>${dog.breed}</td>
+        <td>${dog.description || ""}</td>
+        <td>${dog.vaccinated ? "Yes" : "No"}</td>
+        <td>${dog.cologne ? "Yes" : "No"}</td>
+        <td>${dog.specialGrooming || ""}</td>
+        <td>${dog.price || ""}</td>
+        <td>${dog.phoneNumbers || ""}</td>
+        <td>${dog.address || ""}</td>
+        <td><button onclick="checkIn('${id}')">Check In</button><div class="timestamp">${dog.checkIn || ""}</div></td>
+        <td><button onclick="checkOut('${id}')">Check Out</button><div class="timestamp">${dog.checkOut || ""}</div></td>
+        <td class="action-buttons"><button onclick="deleteDog('${id}')">Delete</button></td>
       `;
       allRows.push(newRow);
       tableBody.appendChild(newRow);
     }
 
-    // Build Upcoming Appointments panel
-    function renderAppointments(dogsObj) {
-      const items = [];
-      for (const [id, dog] of Object.entries(dogsObj || {})) {
-        if (!dog.appointment) continue;
-        const ts = new Date(dog.appointment).getTime();
-        if (isNaN(ts)) continue;
-        items.push({
-          id,
-          dog: dog.name || '',
-          owner: dog.owner || '',
-          breed: dog.breed || '',
-          when: dog.appointment,
-          ts
-        });
-      }
-      items.sort((a,b) => a.ts - b.ts);
-
-      if (items.length === 0) {
-        appointmentsList.innerHTML = `<div style="color:#666">No upcoming appointments.</div>`;
-        return;
-      }
-
-      appointmentsList.innerHTML = items.map(x => `
-        <div class="appt-item">
-          <div class="appt-main">
-            <div>
-              <strong>${new Date(x.when).toLocaleString()}</strong>
-              <span>Appointment</span>
-            </div>
-            <div>
-              <strong>${x.dog}</strong> (${x.breed}) • Owner: <strong>${x.owner}</strong>
-              <span>Dog ID: ${x.id}</span>
-            </div>
-          </div>
-          <div class="appt-actions">
-            <button class="btn-small" onclick="checkIn('${x.id}')">Mark Arrived</button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // Simple owner filter used elsewhere if you add it later
-    function filterTableByOwner() {
-      const filter = document.getElementById('searchOwner').value.trim().toLowerCase();
-      tableBody.innerHTML = '';
-      allRows.forEach(row => {
-        const owner = row.children[1].textContent.trim().toLowerCase();
-        if (!filter || owner.includes(filter)) tableBody.appendChild(row);
+    // Load dogs
+    function loadDogs() {
+      db.ref("dogs").on("value", (snapshot) => {
+        tableBody.innerHTML = "";
+        allRows = [];
+        const dogs = snapshot.val();
+        if (dogs) {
+          Object.entries(dogs).forEach(([id, dog]) => {
+            addDogToTable(dog, id);
+          });
+        }
       });
     }
+    loadDogs();
 
-    function editDog(button) {
-      const row = button.closest('tr');
-      row.querySelectorAll('td[contenteditable]').forEach(td => td.contentEditable = true);
-      button.style.display = 'none';
-      row.querySelector('button[onclick^="saveDog"]').style.display = 'inline-block';
-    }
-
-    function saveDog(button, id) {
-      const row = button.closest('tr');
-      const cells = row.querySelectorAll('td');
-      const updatedDog = {
-        name: cells[0].textContent.trim(),
-        owner: cells[1].textContent.trim(),
-        breed: cells[2].textContent.trim(),
-        description: cells[3].textContent.trim(),
-        vaccinated: cells[4].textContent.trim().toLowerCase() === 'yes',
-        cologne: cells[5].textContent.trim().toLowerCase() === 'yes',
-        specialGrooming: cells[6].textContent.trim(),
-        city: cells[7].textContent.trim(),
-        state: cells[8].textContent.trim(),
-        zip: cells[9].textContent.trim(),
-        veterinarian: cells[10].textContent.trim(),
-        appointment: cells[11].textContent.trim(),
-        checkIn: row.querySelector('.timestamp')?.textContent || '',
-        checkOut: row.querySelectorAll('.timestamp')[1]?.textContent || ''
-      };
-      db.ref('dogs/' + id).set(updatedDog);
-      row.querySelectorAll('td[contenteditable]').forEach(td => td.contentEditable = false);
-      button.style.display = 'none';
-      row.querySelector('button[onclick^="editDog"]').style.display = 'inline-block';
-    }
-
+    // Delete dog
     function deleteDog(id) {
-      if (confirm('Are you sure you want to delete this dog?')) {
-        db.ref('dogs/' + id).remove();
+      if (confirm("Delete this record?")) {
+        db.ref("dogs/" + id).remove();
       }
     }
 
+    // Check in/out
     function checkIn(id) {
       const time = new Date().toLocaleString();
-      db.ref('dogs/' + id + '/checkIn').set(time);
+      db.ref("dogs/" + id + "/checkIn").set(time);
     }
-
     function checkOut(id) {
       const time = new Date().toLocaleString();
-      db.ref('dogs/' + id + '/checkOut').set(time);
+      db.ref("dogs/" + id + "/checkOut").set(time);
     }
 
+    // Search filter
+    function filterTable() {
+      const dogFilter = document.getElementById("searchDog").value.toLowerCase();
+      const ownerFilter = document.getElementById("searchOwner").value.toLowerCase();
+      tableBody.innerHTML = "";
+      allRows.forEach((row) => {
+        const dogName = row.children[0].textContent.toLowerCase();
+        const ownerName = row.children[1].textContent.toLowerCase();
+        if (dogName.includes(dogFilter) && ownerName.includes(ownerFilter)) {
+          tableBody.appendChild(row);
+        }
+      });
+    }
+
+    // Print owner report
     function printReport() {
-      const filterName = document.getElementById('ownerFilter').value.trim().toLowerCase();
-      if (!filterName) {
-        alert('Please enter an owner name to print the report.');
-        return;
-      }
-      const dogs = Array.from(tableBody.querySelectorAll('tr')).filter(row => {
-        const owner = row.children[1].textContent.trim().toLowerCase();
-        return owner === filterName;
-      });
-      if (dogs.length === 0) {
-        alert('No records found for owner: ' + filterName);
-        return;
-      }
+      const filterName = document.getElementById("ownerFilter").value.trim().toLowerCase();
+      if (!filterName) return alert("Enter owner name first");
+      const dogs = Array.from(tableBody.querySelectorAll("tr")).filter(row => row.children[1].textContent.trim().toLowerCase() === filterName);
+      if (dogs.length === 0) return alert("No records found");
       let reportHTML = `
-        <html>
-        <head>
-          <title>Owner Report - ${filterName}</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-            h2 { text-align: center; margin-bottom: 20px; color: #333; }
-            table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-            th, td { padding: 12px 15px; border: 1px solid #ddd; text-align: left; }
-            th { background-color: #4caf50; color: white; }
-            tr:nth-child(even) { background-color: #f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <h2>Dog Records for Owner: ${filterName}</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Dog Name</th>
-                <th>Owner Name</th>
-                <th>Breed</th>
-                <th>Grooming Supplies</th>
-                <th>Vaccinated</th>
-                <th>Cologne</th>
-                <th>Special Grooming</th>
-                <th>City</th>
-                <th>State</th>
-                <th>Zip</th>
-                <th>Veterinarian</th>
-                <th>Appointment</th>
-                <th>Check In</th>
-                <th>Check Out</th>
-              </tr>
-            </thead>
-            <tbody>
+        <html><head><title>Report</title>
+        <style>
+        body { font-family: Arial; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th,td { border:1px solid #ddd; padding:8px; }
+        th { background:#4caf50; color:#fff; }
+        </style></head><body>
+        <h2>Dog Records for ${filterName}</h2>
+        <table><thead>${document.querySelector("thead").innerHTML}</thead><tbody>
       `;
-      dogs.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        reportHTML += `
-          <tr>
-            <td>${cells[0].textContent}</td>
-            <td>${cells[1].textContent}</td>
-            <td>${cells[2].textContent}</td>
-            <td>${cells[3].textContent}</td>
-            <td>${cells[4].textContent}</td>
-            <td>${cells[5].textContent}</td>
-            <td>${cells[6].textContent}</td>
-            <td>${cells[7].textContent}</td>
-            <td>${cells[8].textContent}</td>
-            <td>${cells[9].textContent}</td>
-            <td>${cells[10].textContent}</td>
-            <td>${cells[11].textContent}</td>
-            <td>${cells[12].querySelector('.timestamp')?.textContent || ''}</td>
-            <td>${cells[13].querySelector('.timestamp')?.textContent || ''}</td>
-          </tr>
-        `;
-      });
-      reportHTML += `
-            </tbody>
-          </table>
-        </body>
-        </html>
-      `;
-      const win = window.open('', '_blank', 'width=1000,height=700');
+      dogs.forEach(row => { reportHTML += "<tr>"+row.innerHTML+"</tr>"; });
+      reportHTML += "</tbody></table></body></html>";
+      const win = window.open("", "_blank");
       win.document.write(reportHTML);
       win.document.close();
-      win.focus();
       win.print();
     }
-
-    // Load everything & keep in real-time sync
-    function loadDogs() {
-      db.ref('dogs').on('value', (snapshot) => {
-        tableBody.innerHTML = '';
-        allRows = [];
-        const dogs = snapshot.val() || {};
-        // table
-        Object.entries(dogs).forEach(([id, dog]) => addDogToTable(dog, id));
-        // appointments panel
-        renderAppointments(dogs);
-      });
-    }
-
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
-      const name = document.getElementById('dogName').value.trim();
-      const owner = document.getElementById('ownerName').value.trim();
-      const breed = document.getElementById('breed').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const vaccinated = document.getElementById('vaccinated').checked;
-      const cologne = document.getElementById('cologne').checked;
-      const specialGrooming = document.getElementById('specialGrooming').value.trim();
-      const city = document.getElementById('city').value.trim();
-      const state = document.getElementById('state').value.trim();
-      const zip = document.getElementById('zip').value.trim();
-      const veterinarian = document.getElementById('veterinarian').value.trim();
-      const appointment = document.getElementById('appointment').value.trim();
-
-      // (Health flags exist in your latest version—add them here if you want saved too)
-      // const noisy = ...
-      // Include them in the set() below if needed.
-
-      if (!name || !owner || !breed) {
-        alert('Please fill out all required fields.');
-        return;
-      }
-
-      const newDogRef = db.ref('dogs').push();
-      newDogRef.set({
-        name, owner, breed, description, vaccinated, cologne,
-        specialGrooming, city, state, zip, veterinarian, appointment
-      });
-
-      form.reset();
-    });
-
-    loadDogs();
   </script>
 </body>
 </html>
